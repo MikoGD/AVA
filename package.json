@@ -1,7 +1,7 @@
 {
-  "name": "chrome-extension-typescript-starter",
-  "version": "1.0.0",
-  "description": "chrome-extension-typescript-starter",
+  "name": "ava",
+  "version": "0.1.0",
+  "description": "AVA is a voice assistant Chrome extension to help navigate the web and enchance web experience",
   "main": "index.js",
   "scripts": {
     "watch": "webpack --config webpack/webpack.dev.js --watch",
@@ -14,7 +14,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/MikoGD/Albert-Web.git"
+    "url": "https://github.com/MikoGD/AVA.git"
   },
   "dependencies": {
     "react": "^17.0.1",
