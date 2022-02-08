@@ -7,9 +7,9 @@ import styles from './app.module.scss';
 /* eslint-enable */
 
 async function startListening(client: Client) {
-  console.log('Listening');
   if (client) {
     try {
+      console.log('Listening');
       await client.startContext();
     } catch (e) {
       console.error(e);
@@ -18,9 +18,9 @@ async function startListening(client: Client) {
 }
 
 async function stopListening(client: Client) {
-  console.log('Stopping');
   if (client) {
     try {
+      console.log('Stopping');
       await client.stopContext();
     } catch (e) {
       console.error(e);
@@ -67,11 +67,9 @@ function App(): React.ReactElement {
       if (!isActive) {
         setIsActive(true);
         startListening(client.current);
-        console.log('listening');
       } else {
         setIsActive(false);
         stopListening(client.current);
-        console.log('stop listening');
       }
     }
   }
@@ -97,7 +95,11 @@ function App(): React.ReactElement {
     );
   }, []);
 
-  return <div className={styles.app}>{speech}</div>;
+  return (
+    <div className={isActive ? styles.app : styles.hidden}>
+      <p>{speech}</p>
+    </div>
+  );
 }
 
 const container = document.createElement('div');

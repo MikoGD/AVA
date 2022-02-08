@@ -1,5 +1,5 @@
 .app {
-  background-color: black;
+  background-color: rgba(0, 0, 0, 0.5);
   color: white;
   font-size: 5rem;
   height: 400px;
@@ -9,4 +9,8 @@
   top: 50%;
   transform: translate(-50%, -50%);
   width: 700px;
+}
+
+.hidden {
+  display: none;
 }
