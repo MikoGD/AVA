@@ -1,4 +1,4 @@
-import { Client, Segment } from '@speechly/browser-client';
+import { Client, Segment, ClientState } from '@speechly/browser-client';
 import React, { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 /* eslint-disable */
@@ -6,12 +6,17 @@ import ReactDOM from 'react-dom';
 import styles from './app.module.scss';
 /* eslint-enable */
 
-async function startListening(client: Client) {
+async function startListening(client: Client, connectionState: ClientState) {
   if (client) {
     try {
-      console.log('Listening');
+      if (connectionState === ClientState.Disconnected) {
+        await client.initialize();
+      }
+
+      console.log('Listening: ', client.printStats());
       await client.startContext();
     } catch (e) {
+      console.log('failed to start listening');
       console.error(e);
     }
   }
@@ -23,6 +28,7 @@ async function stopListening(client: Client) {
       console.log('Stopping');
       await client.stopContext();
     } catch (e) {
+      console.log('failed to stop listening');
       console.error(e);
     }
   }
@@ -31,18 +37,36 @@ async function stopListening(client: Client) {
 function App(): React.ReactElement {
   const [isActive, setIsActive] = useState(false);
   const [speech, setSpeech] = useState('');
+  const [connectionState, setConnectionState] = useState(
+    ClientState.Disconnected
+  );
+  const [error, setError] = useState<string | null>(null);
   const client = useRef<Client | null>(null);
 
-  function onInitialized() {
+  function processSegment(segment: Segment) {
+    switch (segment.intent.intent) {
+      case 'open_website':
+        window.location.href = `https://${segment.entities[0].value.toLowerCase()}.com`;
+        break;
+      default:
+        console.error('unhandled intent: ', segment.intent.intent);
+    }
+  }
+
+  async function onInitialized() {
     if (client.current) {
+      setConnectionState(ClientState.Connected);
+      client.current.onStateChange((state) => {
+        setConnectionState(state);
+      });
+
       client.current.onSegmentChange((segment: Segment) => {
-        console.log(
-          'Received new segment from the API:',
-          segment.intent,
-          segment.entities,
-          segment.words,
-          segment.isFinal
-        );
+        console.log('Received new segment from the API:');
+
+        console.log('intent: ', segment.intent);
+        console.log('entities: ', segment.entities);
+        console.log('words: ', segment.words);
+        console.log('isFinal: ', segment.isFinal);
 
         const dictation = segment.words.reduce(
           (currSpeech, currWord) => `${currSpeech} ${currWord.value}`,
@@ -52,6 +76,7 @@ function App(): React.ReactElement {
         console.log(dictation);
 
         setSpeech(dictation);
+        processSegment(segment);
       });
     }
   }
@@ -66,7 +91,7 @@ function App(): React.ReactElement {
       console.log(`isActive? ${isActive ? 'yes' : 'no'}`);
       if (!isActive) {
         setIsActive(true);
-        startListening(client.current);
+        startListening(client.current, connectionState);
       } else {
         setIsActive(false);
         stopListening(client.current);
@@ -83,17 +108,34 @@ function App(): React.ReactElement {
   useEffect(() => {
     client.current = new Client({
       appId: '5a17225f-f487-454f-9e3e-87e18e4994e7',
+      debug: true,
+      logSegments: true,
     });
+
     client.current.initialize().then(
       () => {
-        console.log('Speechly initialized value: ');
         onInitialized();
       },
-      (reason) => {
-        console.error('Speechly failed to initialized: ', reason);
+      () => {
+        console.error('failed to initialize AVA');
       }
     );
   }, []);
+
+  async function initializeAva() {
+    client.current = new Client({
+      appId: '5a17225f-f487-454f-9e3e-87e18e4994e7',
+      debug: true,
+      logSegments: true,
+    });
+
+    try {
+      await client.current.initialize();
+      onInitialized();
+    } catch (e) {
+      setError('failed to initialize');
+    }
+  }
 
   return (
     <div className={isActive ? styles.app : styles.hidden}>
