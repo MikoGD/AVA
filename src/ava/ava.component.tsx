@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Client, ClientState, Segment } from '@speechly/browser-client';
+import classnames from 'classnames';
 /* eslint-disable */
 // @ts-ignore
 import styles from './ava.module.scss';
@@ -87,13 +88,19 @@ export default function App(): React.ReactElement {
     if (repeat) return;
 
     if (ctrlKey && altKey && (key === 'z' || key === 'Z') && client.current) {
-      console.log(`isActive? ${isActive ? 'yes' : 'no'}`);
       if (!isActive) {
         setIsActive(true);
         startListening();
       } else {
         setIsActive(false);
         stopListening();
+      }
+    } else if (ctrlKey && altKey && (key === 'c' || key === 'C')) {
+      if (isActive) {
+        setIsActive(false);
+      } else {
+        setIsActive(true);
+        setSpeech('Go to youtube');
       }
     }
   }
@@ -122,8 +129,8 @@ export default function App(): React.ReactElement {
   }, []);
 
   return (
-    <div className={isActive ? styles.app : styles.hidden}>
-      <p>{speech}</p>
+    <div className={classnames(styles.app, isActive && styles.active)}>
+      {isActive ? <p>{speech}</p> : <div className={styles.logo}>A</div>}
     </div>
   );
 }
