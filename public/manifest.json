@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
-  "name": "Chrome Extension TypeScript Starter",
-  "description": "Chrome Extension, TypeScript, Visual Studio Code",
+  "name": "Ava: Voice Assistant",
+  "description": "Voice assistant for the web",
   "version": "1.0",
   "action": {
     "default_icon": "icon.png",
