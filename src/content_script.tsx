@@ -8,7 +8,7 @@ function App(): React.ReactElement {
 
 const container = document.createElement('div');
 
-container.setAttribute('id', 'app-wrapper');
+container.setAttribute('id', 'ava-wrapper');
 container.style.zIndex = '100000000000000';
 
 document.body.appendChild(container);
