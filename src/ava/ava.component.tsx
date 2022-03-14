@@ -3,6 +3,7 @@ import { Client, ClientState, Segment } from '@speechly/browser-client';
 import classnames from 'classnames';
 import Loader from 'react-spinners/SyncLoader';
 import AvaTextComponent from './ava-speech.component';
+import { wordsToSentence } from '../utils';
 /* eslint-disable */
 // @ts-ignore
 import styles from './ava.module.scss';
@@ -41,12 +42,7 @@ export default function App(): React.ReactElement {
         console.log('words: ', words);
         console.log('isFinal: ', isFinal);
 
-        const dictation = segment.words.reduce(
-          (currSpeech, currWord) => `${currSpeech} ${currWord.value}`,
-          ''
-        );
-
-        console.log(dictation);
+        const dictation = wordsToSentence(words);
 
         setSpeech(dictation);
         processSegment(segment);
@@ -62,10 +58,9 @@ export default function App(): React.ReactElement {
           onInitialized();
         }
 
-        console.log('Listening: ', client.current.printStats());
         await client.current.startContext();
       } catch (e) {
-        console.log('failed to start listening');
+        console.error('failed to start listening');
         console.error(e);
       }
     }
@@ -74,11 +69,9 @@ export default function App(): React.ReactElement {
   async function stopListening() {
     if (client.current) {
       try {
-        console.log('Stopping');
         await client.current.stopContext();
         setSpeech('');
       } catch (e) {
-        console.log('failed to stop listening');
         console.error(e);
       }
     }
@@ -90,8 +83,6 @@ export default function App(): React.ReactElement {
 
       // eslint-disable-next-line no-useless-return
       if (repeat) return;
-
-      console.log(`[handleKeyDown] - client state: ${connectionState}`);
 
       if (ctrlKey && altKey && (key === 'z' || key === 'Z') && client.current) {
         if (!isActive) {
