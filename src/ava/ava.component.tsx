@@ -1,6 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Client, ClientState, Segment } from '@speechly/browser-client';
 import classnames from 'classnames';
+import Loader from 'react-spinners/SyncLoader';
 import AvaTextComponent from './ava-speech.component';
 /* eslint-disable */
 // @ts-ignore
@@ -14,34 +15,6 @@ export default function App(): React.ReactElement {
   );
   const [speech, setSpeech] = useState('');
   const client = useRef<Client | null>(null);
-
-  async function startListening() {
-    if (client.current) {
-      try {
-        if (connectionState === ClientState.Disconnected) {
-          await client.current.initialize();
-        }
-
-        console.log('Listening: ', client.current.printStats());
-        await client.current.startContext();
-      } catch (e) {
-        console.log('failed to start listening');
-        console.error(e);
-      }
-    }
-  }
-
-  async function stopListening() {
-    if (client.current) {
-      try {
-        console.log('Stopping');
-        await client.current.stopContext();
-      } catch (e) {
-        console.log('failed to stop listening');
-        console.error(e);
-      }
-    }
-  }
 
   function processSegment(segment: Segment) {
     switch (segment.intent.intent) {
@@ -69,8 +42,7 @@ export default function App(): React.ReactElement {
         console.log('isFinal: ', isFinal);
 
         const dictation = segment.words.reduce(
-          (currSpeech, currWord) =>
-            `${currSpeech} ${currWord.value}${isFinal ? '.' : ''}`,
+          (currSpeech, currWord) => `${currSpeech} ${currWord.value}`,
           ''
         );
 
@@ -82,36 +54,71 @@ export default function App(): React.ReactElement {
     }
   }
 
-  function handleKeyDown(event: KeyboardEvent) {
-    const { key, repeat, ctrlKey, altKey } = event;
+  async function startListening() {
+    if (client.current) {
+      try {
+        if (connectionState === ClientState.Disconnected) {
+          await client.current.initialize();
+          onInitialized();
+        }
 
-    // eslint-disable-next-line no-useless-return
-    if (repeat) return;
-
-    if (ctrlKey && altKey && (key === 'z' || key === 'Z') && client.current) {
-      if (!isActive) {
-        setIsActive(true);
-        startListening();
-      } else {
-        setIsActive(false);
-        stopListening();
-      }
-    } else if (ctrlKey && altKey && (key === 'c' || key === 'C')) {
-      if (isActive) {
-        setIsActive(false);
-        setSpeech('');
-      } else {
-        setIsActive(true);
-        setSpeech('Go to youtube');
+        console.log('Listening: ', client.current.printStats());
+        await client.current.startContext();
+      } catch (e) {
+        console.log('failed to start listening');
+        console.error(e);
       }
     }
   }
+
+  async function stopListening() {
+    if (client.current) {
+      try {
+        console.log('Stopping');
+        await client.current.stopContext();
+        setSpeech('');
+      } catch (e) {
+        console.log('failed to stop listening');
+        console.error(e);
+      }
+    }
+  }
+
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      const { key, repeat, ctrlKey, altKey } = event;
+
+      // eslint-disable-next-line no-useless-return
+      if (repeat) return;
+
+      console.log(`[handleKeyDown] - client state: ${connectionState}`);
+
+      if (ctrlKey && altKey && (key === 'z' || key === 'Z') && client.current) {
+        if (!isActive) {
+          setIsActive(true);
+          startListening();
+        } else {
+          setIsActive(false);
+          stopListening();
+        }
+      } else if (ctrlKey && altKey && (key === 'c' || key === 'C')) {
+        if (isActive) {
+          setIsActive(false);
+          setSpeech('');
+        } else {
+          setIsActive(true);
+          setSpeech('Go to youtube');
+        }
+      }
+    },
+    [connectionState, isActive]
+  );
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown, true);
 
     return () => window.removeEventListener('keydown', handleKeyDown, true);
-  }, [isActive, client.current]);
+  }, [isActive, client.current, handleKeyDown]);
 
   useEffect(() => {
     client.current = new Client({
@@ -130,13 +137,17 @@ export default function App(): React.ReactElement {
     );
   }, []);
 
+  /* eslint-disable */
   return (
     <div className={classnames(styles.app, isActive && styles.active)}>
       {isActive ? (
         <AvaTextComponent text={speech} />
+      ) : connectionState !== ClientState.Connected ? (
+        <Loader size={10} />
       ) : (
         <div className={styles.logo}>A</div>
       )}
     </div>
   );
+  /* eslint-enable */
 }
