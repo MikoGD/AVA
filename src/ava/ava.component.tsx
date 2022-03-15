@@ -7,6 +7,7 @@ import { wordsToSentence } from '../utils';
 /* eslint-disable */
 // @ts-ignore
 import styles from './ava.module.scss';
+import { processSegment } from './ava-commands';
 /* eslint-enable */
 
 export default function App(): React.ReactElement {
@@ -16,16 +17,6 @@ export default function App(): React.ReactElement {
   );
   const [speech, setSpeech] = useState('');
   const client = useRef<Client | null>(null);
-
-  function processSegment(segment: Segment) {
-    switch (segment.intent.intent) {
-      case 'open_website':
-        window.location.href = `https://${segment.entities[0].value.toLowerCase()}.com`;
-        break;
-      default:
-        console.error('unhandled intent: ', segment.intent.intent);
-    }
-  }
 
   async function onInitialized() {
     if (client.current) {
@@ -45,7 +36,10 @@ export default function App(): React.ReactElement {
         const dictation = wordsToSentence(words);
 
         setSpeech(dictation);
-        processSegment(segment);
+
+        if (isFinal) {
+          processSegment(segment);
+        }
       });
     }
   }

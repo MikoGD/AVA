@@ -20,3 +20,17 @@ export function wordsToSentence(words: Word[]) {
     return `${currSentence} ${currWord}`;
   }, '');
 }
+
+/* Returns the scrollHeight of the tallest child of node given */
+export function getMaxChildScrollHeight<T extends HTMLElement>(parent: T) {
+  const children = Array.from(parent.children);
+  let maxScrollHeight = 0;
+
+  children.forEach((child) => {
+    if (maxScrollHeight < child.scrollHeight) {
+      maxScrollHeight = child.scrollHeight;
+    }
+  });
+
+  return maxScrollHeight;
+}
