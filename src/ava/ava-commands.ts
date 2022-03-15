@@ -28,8 +28,9 @@ function handlePositionScroll(position: string) {
 }
 
 function handleDirectionScroll(direction: string) {
-  const verticalIncrement = 500;
-  const horizontalIncrement = 250;
+  const verticalIncrement = window.visualViewport.height / 2;
+  const horizontalIncrement = window.visualViewport.width / 2;
+
   let scrollOptions: ScrollToOptions = {
     top: 0,
     left: 0,
