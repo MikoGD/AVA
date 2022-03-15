@@ -1,0 +1,9 @@
+@import './styles/index.scss';
+
+#avaWrapper {
+  box-sizing: border-box;
+  font-family: 'Opens Sans', sans-serif !important;
+  font-size: $default-font-size !important;
+  margin: 0;
+  padding: 0;
+}

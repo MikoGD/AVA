@@ -1,0 +1,30 @@
+$bp-sm: 720px;
+$bp-md: 1080px;
+$bp-lg: 1440px;
+$bp-xl: 2160px;
+
+@mixin responsive($break-point) {
+  @if $break-point == $bp-sm {
+    @media only screen and (min-width: $bp-sm) {
+      @content;
+    }
+  }
+
+  @if $break-point == $bp-md {
+    @media only screen and (min-width: $bp-md) {
+      @content;
+    }
+  }
+
+  @if $break-point == $bp-lg {
+    @media only screen and (min-width: $bp-lg) {
+      @content;
+    }
+  }
+
+  @if $break == $bp-xl {
+    @media only screen and (min-width: $bp-xl) {
+      @content;
+    }
+  }
+} ;

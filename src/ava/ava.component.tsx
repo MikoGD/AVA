@@ -130,7 +130,9 @@ export default function App(): React.ReactElement {
       ) : connectionState !== ClientState.Connected ? (
         <Loader size={10} />
       ) : (
-        <div className={styles.logo}>A</div>
+        <div>
+          <p>A</p>
+        </div>
       )}
     </div>
   );

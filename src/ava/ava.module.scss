@@ -1,33 +1,32 @@
-$bg-color: white;
+@import '../styles/index.scss';
 
 .app {
   align-items: center;
-  border-radius: 4rem;
+  border-radius: 4em;
   bottom: 5%;
-  background-color: $bg-color;
+  background-color: $bg-main;
   display: flex;
-  height: 8rem;
+  height: 8em;
   justify-content: center;
   left: 5%;
   overflow-wrap: break-word;
   position: fixed;
-  width: 8rem;
-  box-shadow: 0 0.3rem 1rem 0.2rem rgba(0, 0, 0, 0.2);
+  width: 8em;
+  box-shadow: $shadow;
   z-index: 100000000000000000;
   transition: width 0.5s;
+
+  & p {
+    font-size: large;
+  }
 }
 
 .active {
-  width: 50rem;
-  border-radius: 4rem;
-  font-size: 2rem;
-  padding: 0 4rem;
+  width: 50em;
+  border-radius: 4em;
+  padding: 0 4em;
   flex-direction: row;
   justify-content: start;
-}
-
-.logo {
-  font-size: 5rem;
 }
 
 .hidden {
