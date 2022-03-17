@@ -3,6 +3,7 @@ import { Client, ClientState, Segment } from '@speechly/browser-client';
 import classnames from 'classnames';
 import Loader from 'react-spinners/SyncLoader';
 import AvaTextComponent from './ava-speech.component';
+import { Modal, ModalHeader, ModalBody } from '../modal';
 import { wordsToSentence } from '../utils';
 /* eslint-disable */
 // @ts-ignore
@@ -17,6 +18,7 @@ export default function App(): React.ReactElement {
   );
   const [speech, setSpeech] = useState('');
   const client = useRef<Client | null>(null);
+  const modalBodyRef = useRef<HTMLDivElement | null>(null);
 
   async function onInitialized() {
     if (client.current) {
@@ -122,19 +124,52 @@ export default function App(): React.ReactElement {
     );
   }, []);
 
+  const [tags, setTags] = useState<JSX.Element[] | null>(null);
+
+  useEffect(() => {
+    console.log('[ref] - useState ', modalBodyRef);
+    if (modalBodyRef && modalBodyRef.current) {
+      const rawTags = Array.from(document.getElementsByTagName('a'));
+
+      setTags(
+        rawTags.map((tag, index) => {
+          if (tag.text) {
+            return (
+              <p key={tag.ENTITY_NODE}>
+                {index}. {tag.text}
+              </p>
+            );
+          }
+
+          return (
+            <p key={tag.ENTITY_NODE}>
+              {index}. {tag.getAttribute('aria-label')}
+            </p>
+          );
+        })
+      );
+    }
+  }, [modalBodyRef, modalBodyRef.current]);
+
   /* eslint-disable */
   return (
-    <div className={classnames(styles.app, isActive && styles.active)}>
-      {isActive ? (
-        <AvaTextComponent text={speech} />
-      ) : connectionState !== ClientState.Connected ? (
-        <Loader size={10} />
-      ) : (
-        <div>
-          <p>A</p>
-        </div>
-      )}
-    </div>
+    <>
+      <Modal>
+        <ModalHeader>Tags</ModalHeader>
+        <ModalBody ref={modalBodyRef}>{tags}</ModalBody>
+      </Modal>
+      <div className={classnames(styles.app, isActive && styles.active)}>
+        {isActive ? (
+          <AvaTextComponent text={speech} />
+        ) : connectionState !== ClientState.Connected ? (
+          <Loader size={10} />
+        ) : (
+          <div>
+            <p>A</p>
+          </div>
+        )}
+      </div>
+    </>
   );
   /* eslint-enable */
 }

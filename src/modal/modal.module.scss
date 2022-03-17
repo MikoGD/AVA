@@ -1,0 +1,49 @@
+@import '../styles/index.scss';
+
+.container {
+  background-color: rgba(0, 0, 0, 0.5);
+  height: 100vh;
+  padding: 1.5em;
+  position: fixed;
+  width: 100vw;
+  z-index: 100000000000000000;
+}
+
+.modal {
+  background-color: $bg-main;
+  border-radius: 1em;
+  box-shadow: $shadow;
+  display: flex;
+  flex-direction: column;
+  height: 50em;
+  left: 50%;
+  padding: 0 2em;
+  position: fixed;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 70em;
+
+  &Header {
+    align-items: center;
+    display: flex;
+    height: 10em;
+    width: 100%;
+
+    & h2 {
+      font-size: xxx-large;
+    }
+  }
+
+  &Body {
+    align-items: start;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    flex-grow: 1;
+    overflow-y: scroll;
+
+    & p {
+      font-size: x-large;
+    }
+  }
+}
