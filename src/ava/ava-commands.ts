@@ -1,5 +1,6 @@
-import { Segment } from '@speechly/browser-client';
+import { Segment, Entity } from '@speechly/browser-client';
 import { getMaxChildScrollHeight } from '../utils';
+import { ModalOptions } from './ava-types';
 
 function handlePositionScroll(position: string) {
   const body = document.getElementsByTagName('body')[0];
@@ -72,13 +73,58 @@ function handleScrollIntent(segment: Segment) {
   }
 }
 
-export function processSegment(segment: Segment) {
+function handleModalOptions(entities: Entity[], modalOptions: ModalOptions) {
+  let modalOption = '';
+  let modalType = '';
+  const tagAliases = 'TAG TAGS LINK LINKS LIST';
+  const modalOptionTypes = { open: 'OPEN LIST', close: 'CLOSE' };
+
+  entities.forEach((entity) => {
+    if (entity.type === 'modal_options') {
+      if (modalOptionTypes.open.includes(entity.value)) {
+        modalOption = modalOptionTypes.open;
+      } else {
+        modalOption = modalOptionTypes.close;
+      }
+    }
+
+    if (entity.type === 'modal_type') {
+      if (tagAliases.includes(entity.value)) {
+        modalType = tagAliases;
+      }
+    }
+  });
+
+  const modalCommand = `${modalOption} ${modalType}`;
+
+  if (!modalOption || !modalType) {
+    console.error('invalid modal entities', entities);
+    console.log('modal command: ', modalCommand);
+    return;
+  }
+
+  switch (modalCommand) {
+    case `${modalOptionTypes.open} ${tagAliases}`:
+      modalOptions.openTagModal();
+      break;
+    case `${modalOptionTypes.close} ${tagAliases}`:
+      modalOptions.closeTagModal();
+      break;
+    default:
+      console.error('unhandled modal command', modalCommand);
+  }
+}
+
+export function processSegment(segment: Segment, modalOptions: ModalOptions) {
   switch (segment.intent.intent) {
     case 'open_website':
       window.location.href = `https://${segment.entities[0].value.toLowerCase()}.com`;
       break;
     case 'scroll':
       handleScrollIntent(segment);
+      break;
+    case 'tags':
+      handleModalOptions(segment.entities, modalOptions);
       break;
     default:
       console.error('unhandled intent: ', segment.intent.intent);

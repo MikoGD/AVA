@@ -32,3 +32,18 @@
 .hidden {
   display: none;
 }
+
+.tag {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.originalTagContainer {
+  align-items: center;
+  border: 1px solid black;
+  border-radius: 0.25em;
+  display: flex;
+  height: fit-content;
+  max-width: 25em;
+  padding: 0.5em;
+}

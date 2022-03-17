@@ -9,16 +9,31 @@ import { wordsToSentence } from '../utils';
 // @ts-ignore
 import styles from './ava.module.scss';
 import { processSegment } from './ava-commands';
+import { ModalOptions } from './ava-types';
 /* eslint-enable */
 
+interface OriginalTags {
+  [id: string]: Node;
+}
+
+const textElements = ['P', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6'];
+
 export default function App(): React.ReactElement {
+  // useStates
   const [isActive, setIsActive] = useState(false);
   const [connectionState, setConnectionState] = useState(
     ClientState.Disconnected
   );
   const [speech, setSpeech] = useState('');
+  const [isTagsOpen, setIsTagsOpen] = useState(false);
+  // useRefs
   const client = useRef<Client | null>(null);
   const modalBodyRef = useRef<HTMLDivElement | null>(null);
+
+  const modalOptions: ModalOptions = {
+    openTagModal: () => setIsTagsOpen(true),
+    closeTagModal: () => setIsTagsOpen(false),
+  };
 
   async function onInitialized() {
     if (client.current) {
@@ -40,7 +55,7 @@ export default function App(): React.ReactElement {
         setSpeech(dictation);
 
         if (isFinal) {
-          processSegment(segment);
+          processSegment(segment, modalOptions);
         }
       });
     }
@@ -125,39 +140,92 @@ export default function App(): React.ReactElement {
   }, []);
 
   const [tags, setTags] = useState<JSX.Element[] | null>(null);
+  const [originalTags, setOriginalTags] = useState<OriginalTags | null>();
 
   useEffect(() => {
-    console.log('[ref] - useState ', modalBodyRef);
-    if (modalBodyRef && modalBodyRef.current) {
+    if (isTagsOpen) {
       const rawTags = Array.from(document.getElementsByTagName('a'));
+      const validTags: React.ReactElement[] = [];
+      const ogTags: OriginalTags = {};
+      let index = 1;
 
-      setTags(
-        rawTags.map((tag, index) => {
-          if (tag.text) {
-            return (
-              <p key={tag.ENTITY_NODE}>
-                {index}. {tag.text}
+      rawTags.forEach((tag) => {
+        const tagClone = tag.cloneNode(true);
+        const ariaLabel = tag.getAttribute('aria-label')?.trim();
+        const titleAttr = tag.getAttribute('title')?.trim();
+        let displayText = '';
+
+        if (ariaLabel) {
+          displayText = ariaLabel;
+        } else if (titleAttr) {
+          displayText = titleAttr;
+        } else {
+          displayText = tag.text?.trim();
+
+          Array.from(tag.children).forEach((child) => {
+            if (textElements.includes(child.nodeName)) {
+              if (child.textContent) {
+                displayText = child.textContent;
+              }
+            }
+          });
+        }
+
+        const id = `${index}${displayText}`;
+
+        if (displayText) {
+          /* eslint-disable react/self-closing-comp */
+          validTags.push(
+            <div id={id} className={styles.tag}>
+              <p key={id}>
+                {`${index}.`} {displayText}
               </p>
-            );
-          }
 
-          return (
-            <p key={tag.ENTITY_NODE}>
-              {index}. {tag.getAttribute('aria-label')}
-            </p>
+              <div className={styles.originalTagContainer}></div>
+            </div>
           );
-        })
-      );
+          /* eslint-enable react/self-closing-comp */
+
+          ogTags[id] = tagClone;
+          index += 1;
+        }
+      });
+
+      setTags(validTags);
+      setOriginalTags(ogTags);
     }
-  }, [modalBodyRef, modalBodyRef.current]);
+  }, [isTagsOpen]);
+
+  useEffect(() => {
+    if (originalTags) {
+      Object.entries(originalTags).forEach(([id, anchorElement]) => {
+        const tag = document.getElementById(id);
+        if (tag) {
+          const ogTagContainer = tag.getElementsByClassName(
+            styles.originalTagContainer
+          )[0];
+
+          ogTagContainer.append(anchorElement.cloneNode(true));
+
+          const cites = ogTagContainer.getElementsByTagName('cite');
+
+          Array.from(cites).forEach((cite) => {
+            cite.remove();
+          });
+        }
+      });
+    }
+  }, [originalTags]);
 
   /* eslint-disable */
   return (
     <>
-      <Modal>
-        <ModalHeader>Tags</ModalHeader>
-        <ModalBody ref={modalBodyRef}>{tags}</ModalBody>
-      </Modal>
+      {isTagsOpen && (
+        <Modal>
+          <ModalHeader>Tags</ModalHeader>
+          <ModalBody ref={modalBodyRef}>{tags ? tags : <Loader />}</ModalBody>
+        </Modal>
+      )}
       <div className={classnames(styles.app, isActive && styles.active)}>
         {isActive ? (
           <AvaTextComponent text={speech} />
