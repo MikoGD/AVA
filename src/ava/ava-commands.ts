@@ -131,12 +131,22 @@ function handleTagsIntent(): React.ReactElement[] | void {
       let y = top;
 
       if (width < 50) {
-        const leftPosition = left - 25;
+        let leftPosition = left - 12.5;
+
+        if (width < 25) {
+          leftPosition = left - 25;
+        }
+
         x = leftPosition < 0 ? 0 : leftPosition;
       }
 
       if (height < 50) {
-        const topPosition = top - 25;
+        let topPosition = top - 12.5;
+
+        if (height < 25) {
+          topPosition = top - 25;
+        }
+
         y = topPosition < 0 ? 0 : topPosition;
       }
 
