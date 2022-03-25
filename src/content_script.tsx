@@ -1,13 +1,19 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { Provider } from 'react-redux';
 import Ava from './ava';
+import Store from './store';
 /* eslint-disable */
 // @ts-ignore
 import styles from './content_script.scss';
 /* eslint-enable */
 
 function App(): React.ReactElement {
-  return <Ava />;
+  return (
+    <Provider store={Store}>
+      <Ava />
+    </Provider>
+  );
 }
 
 const container = document.createElement('div');

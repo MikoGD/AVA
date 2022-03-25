@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, {
+  ReactElement,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { Client, ClientState, Segment } from '@speechly/browser-client';
 import classnames from 'classnames';
 import Loader from 'react-spinners/SyncLoader';
@@ -9,7 +15,9 @@ import { wordsToSentence } from '../utils';
 // @ts-ignore
 import styles from './ava.module.scss';
 import { processSegment } from './ava-commands';
-import { ModalOptions } from './ava-types';
+import { Badge, ModalOptions } from './ava-types';
+import { useSelector } from 'react-redux';
+import { TagsState } from '../store/store';
 /* eslint-enable */
 
 interface OriginalTags {
@@ -34,6 +42,12 @@ export default function App(): React.ReactElement {
     openTagModal: () => setIsTagsOpen(true),
     closeTagModal: () => setIsTagsOpen(false),
   };
+
+  const badges = useSelector<TagsState, Badge[]>((state) => state.badges);
+
+  const [badgesElement, setBadgesElement] = useState<ReactElement[] | null>(
+    null
+  );
 
   async function onInitialized() {
     if (client.current) {
@@ -139,6 +153,17 @@ export default function App(): React.ReactElement {
     );
   }, []);
 
+  useEffect(() => {
+    if (badges.length > 0) {
+      const badgesElementTemp: ReactElement[] = badges.map((badge) => {
+        console.log(badge);
+        return <span {...badge} key={`${badge.children}`} />;
+      });
+
+      setBadgesElement(badgesElementTemp);
+    }
+  }, [badges]);
+
   const [tags, setTags] = useState<JSX.Element[] | null>(null);
   const [originalTags, setOriginalTags] = useState<OriginalTags | null>();
 
@@ -220,6 +245,7 @@ export default function App(): React.ReactElement {
   /* eslint-disable */
   return (
     <>
+      {badgesElement}
       {isTagsOpen && (
         <Modal>
           <ModalHeader>Tags</ModalHeader>
