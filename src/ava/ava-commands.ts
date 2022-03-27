@@ -2,7 +2,7 @@ import { Segment, Entity } from '@speechly/browser-client';
 import React from 'react';
 import { getMaxChildScrollHeight } from '../utils';
 import { Badge, ModalOptions } from './ava-types';
-import Store, { setBadges } from '../store';
+import Store, { clearBadges, setBadges } from '../store';
 import styles from './ava.module.scss';
 
 function handlePositionScroll(position: string) {
@@ -118,7 +118,22 @@ function handleModalOptions(entities: Entity[], modalOptions: ModalOptions) {
   }
 }
 
-function handleTagsIntent(): React.ReactElement[] | void {
+function handleTagsIntent(
+  entities: Entity[],
+  modalOptions: ModalOptions
+): React.ReactElement[] | void {
+  console.log('[badge] - handleTagsIntent', entities);
+  if (entities.length > 0) {
+    if (entities.some(({ type }) => type === 'hide_tags')) {
+      console.log('[badge] clearing badges');
+      Store.dispatch(clearBadges());
+      return;
+    }
+
+    handleModalOptions(entities, modalOptions);
+    return;
+  }
+
   const badges: Badge[] = [];
 
   Array.from(document.getElementsByTagName('a')).forEach(
@@ -151,7 +166,6 @@ function handleTagsIntent(): React.ReactElement[] | void {
       }
 
       badges.push({
-        className: styles.tagBadge as string,
         style: { left: x, top: y },
         children: `${index}`,
       });
@@ -170,11 +184,7 @@ export function processSegment(segment: Segment, modalOptions: ModalOptions) {
       handleScrollIntent(segment);
       break;
     case 'tags':
-      if (segment.entities.length > 0) {
-        handleModalOptions(segment.entities, modalOptions);
-      } else {
-        handleTagsIntent();
-      }
+      handleTagsIntent(segment.entities, modalOptions);
       break;
     default:
       console.error('unhandled intent: ', segment.intent.intent);

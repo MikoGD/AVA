@@ -1,5 +1,5 @@
-import Store, { setBadges } from './store';
+import Store, { clearBadges, setBadges } from './store';
 
-export { setBadges };
+export { clearBadges, setBadges };
 
 export default Store;

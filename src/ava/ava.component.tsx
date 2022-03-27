@@ -1,30 +1,16 @@
-import React, {
-  ReactElement,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Client, ClientState, Segment } from '@speechly/browser-client';
 import classnames from 'classnames';
 import Loader from 'react-spinners/SyncLoader';
 import AvaTextComponent from './ava-speech.component';
-import { Modal, ModalHeader, ModalBody } from '../modal';
 import { wordsToSentence } from '../utils';
 /* eslint-disable */
 // @ts-ignore
 import styles from './ava.module.scss';
 import { processSegment } from './ava-commands';
-import { Badge, ModalOptions } from './ava-types';
-import { useSelector } from 'react-redux';
-import { TagsState } from '../store/store';
+import { ModalOptions } from './ava-types';
+import Tags from './tags';
 /* eslint-enable */
-
-interface OriginalTags {
-  [id: string]: Node;
-}
-
-const textElements = ['P', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6'];
 
 export default function App(): React.ReactElement {
   // useStates
@@ -36,18 +22,11 @@ export default function App(): React.ReactElement {
   const [isTagsOpen, setIsTagsOpen] = useState(false);
   // useRefs
   const client = useRef<Client | null>(null);
-  const modalBodyRef = useRef<HTMLDivElement | null>(null);
 
   const modalOptions: ModalOptions = {
     openTagModal: () => setIsTagsOpen(true),
     closeTagModal: () => setIsTagsOpen(false),
   };
-
-  const badges = useSelector<TagsState, Badge[]>((state) => state.badges);
-
-  const [badgesElement, setBadgesElement] = useState<ReactElement[] | null>(
-    null
-  );
 
   async function onInitialized() {
     if (client.current) {
@@ -153,105 +132,10 @@ export default function App(): React.ReactElement {
     );
   }, []);
 
-  useEffect(() => {
-    if (badges.length > 0) {
-      const badgesElementTemp: ReactElement[] = badges.map((badge) => {
-        console.log(badge);
-        return <span {...badge} key={`${badge.children}`} />;
-      });
-
-      setBadgesElement(badgesElementTemp);
-    }
-  }, [badges]);
-
-  const [tags, setTags] = useState<JSX.Element[] | null>(null);
-  const [originalTags, setOriginalTags] = useState<OriginalTags | null>();
-
-  useEffect(() => {
-    if (isTagsOpen) {
-      const rawTags = Array.from(document.getElementsByTagName('a'));
-      const validTags: React.ReactElement[] = [];
-      const ogTags: OriginalTags = {};
-      let index = 1;
-
-      rawTags.forEach((tag) => {
-        const tagClone = tag.cloneNode(true);
-        const ariaLabel = tag.getAttribute('aria-label')?.trim();
-        const titleAttr = tag.getAttribute('title')?.trim();
-        let displayText = '';
-
-        if (ariaLabel) {
-          displayText = ariaLabel;
-        } else if (titleAttr) {
-          displayText = titleAttr;
-        } else {
-          displayText = tag.text?.trim();
-
-          Array.from(tag.children).forEach((child) => {
-            if (textElements.includes(child.nodeName)) {
-              if (child.textContent) {
-                displayText = child.textContent;
-              }
-            }
-          });
-        }
-
-        const id = `${index}${displayText}`;
-
-        if (displayText) {
-          /* eslint-disable react/self-closing-comp */
-          validTags.push(
-            <div id={id} className={styles.tag}>
-              <p key={id}>
-                {`${index}.`} {displayText}
-              </p>
-
-              <div className={styles.originalTagContainer}></div>
-            </div>
-          );
-          /* eslint-enable react/self-closing-comp */
-
-          ogTags[id] = tagClone;
-          index += 1;
-        }
-      });
-
-      setTags(validTags);
-      setOriginalTags(ogTags);
-    }
-  }, [isTagsOpen]);
-
-  useEffect(() => {
-    if (originalTags) {
-      Object.entries(originalTags).forEach(([id, anchorElement]) => {
-        const tag = document.getElementById(id);
-        if (tag) {
-          const ogTagContainer = tag.getElementsByClassName(
-            styles.originalTagContainer
-          )[0];
-
-          ogTagContainer.append(anchorElement.cloneNode(true));
-
-          const cites = ogTagContainer.getElementsByTagName('cite');
-
-          Array.from(cites).forEach((cite) => {
-            cite.remove();
-          });
-        }
-      });
-    }
-  }, [originalTags]);
-
   /* eslint-disable */
   return (
     <>
-      {badgesElement}
-      {isTagsOpen && (
-        <Modal>
-          <ModalHeader>Tags</ModalHeader>
-          <ModalBody ref={modalBodyRef}>{tags ? tags : <Loader />}</ModalBody>
-        </Modal>
-      )}
+      <Tags isTagsOpen={isTagsOpen} />
       <div className={classnames(styles.app, isActive && styles.active)}>
         {isActive ? (
           <AvaTextComponent text={speech} />

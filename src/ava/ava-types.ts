@@ -8,7 +8,6 @@ export interface ModalOptions {
 
 export interface Badge {
   children: ReactNode;
-  className: string;
   style: {
     top: number;
     left: number;

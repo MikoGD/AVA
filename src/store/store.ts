@@ -16,9 +16,12 @@ const tagsSlice = createSlice({
     setBadges(state: TagsState, action: PayloadAction<Badge[]>) {
       state.badges = action.payload;
     },
+    clearBadges(state: TagsState) {
+      state.badges = [];
+    },
   },
 });
 
-export const { setBadges } = tagsSlice.actions;
+export const { clearBadges, setBadges } = tagsSlice.actions;
 
 export default configureStore(tagsSlice);
