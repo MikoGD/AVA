@@ -677,15 +677,6 @@
     base-64 "^0.1.0"
     uuid "^8.0.0"
 
-"@speechly/browser-client@^1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@speechly/browser-client/-/browser-client-1.1.0.tgz#4714470d5aec332b47f3e4f36fad59291b9d9516"
-  integrity sha512-8IC7kDQ14zeWoXqM+gLxdP4OiARPgGQx/KSF0M6osKQ65QF6T0ySIA8ZkI2hki7MQPwWBYBAnZU9pyMW74qptA==
-  dependencies:
-    base-64 "^0.1.0"
-    locale-code "^2.0.2"
-    uuid "^8.0.0"
-
 "@speechly/react-client@^2.0.0":
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/@speechly/react-client/-/react-client-2.0.0.tgz#91ab5e2e9f61536b4bda1a72877379873a0bb26d"
@@ -2720,25 +2711,6 @@ isexe@^2.0.0:
   resolved "https://registry.yarnpkg.com/isexe/-/isexe-2.0.0.tgz#e8fbf374dc556ff8947a10dcb0572d633f2cfa10"
   integrity sha1-6PvzdNxVb/iUehDcsFctYz8s+hA=
 
-iso-3166-1-alpha-2@~1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/iso-3166-1-alpha-2/-/iso-3166-1-alpha-2-1.0.0.tgz#bc9e0bb94e584df5468a932997a28552e26f97ac"
-  integrity sha1-vJ4LuU5YTfVGipMpl6KFUuJvl6w=
-  dependencies:
-    mout "^0.11.0"
-
-iso-639-1-zh@^2.0.4:
-  version "2.0.4"
-  resolved "https://registry.yarnpkg.com/iso-639-1-zh/-/iso-639-1-zh-2.0.4.tgz#61b577d14ee8b0c2c8e73697a3c894fe02dbd541"
-  integrity sha1-YbV30U7osMLI5zaXo8iU/gLb1UE=
-  dependencies:
-    iso-639-1 "^2.0.0"
-
-iso-639-1@^2.0.0:
-  version "2.1.12"
-  resolved "https://registry.yarnpkg.com/iso-639-1/-/iso-639-1-2.1.12.tgz#3893075f50506e98e6243398a5d83ea0f6355524"
-  integrity sha512-XuThg6XyPBj4RpXtsLbgbJPww6cQeSoiVQWJprM72f1ZTEV/1oeTMzU+dUY+SMPkHfIM5CfaliR4veTVtdXRKg==
-
 isobject@^3.0.1:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/isobject/-/isobject-3.0.1.tgz#4e431e92b11a9731636aa1f9c8d1ccbcfdab78df"
@@ -3357,14 +3329,6 @@ loader-utils@^2.0.0:
     emojis-list "^3.0.0"
     json5 "^2.1.2"
 
-locale-code@^2.0.2:
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/locale-code/-/locale-code-2.0.2.tgz#660d80c5825d8fe9f3ba4a72de5716833ec7d0ed"
-  integrity sha512-wNcUMwk6Nlc10pnZZXWtKArAOZHhH8p2vohPEIENg7ImwMrib/CwKSvyV4g9Wm7KjylyHzXnEMz4i/W3w57wlw==
-  dependencies:
-    iso-3166-1-alpha-2 "~1.0.0"
-    iso-639-1-zh "^2.0.4"
-
 locate-path@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/locate-path/-/locate-path-2.0.0.tgz#2b568b265eec944c6d9c0de9c3dbbbca0354cd8e"
@@ -3482,11 +3446,6 @@ minimist@^1.2.0, minimist@^1.2.5:
   version "1.2.5"
   resolved "https://registry.yarnpkg.com/minimist/-/minimist-1.2.5.tgz#67d66014b66a6a8aaa0c083c5fd58df4e4e97602"
   integrity sha512-FM9nNUYrRBAELZQT3xeZQ7fmMOBg6nWNmJKTcgsJeaLstP/UODVpGsr5OhXhhXg6f+qtJ8uiZ+PUxkDWcgIXLw==
-
-mout@^0.11.0:
-  version "0.11.1"
-  resolved "https://registry.yarnpkg.com/mout/-/mout-0.11.1.tgz#ba3611df5f0e5b1ffbfd01166b8f02d1f5fa2b99"
-  integrity sha1-ujYR318OWx/7/QEWa48C0fX6K5k=
 
 ms@2.0.0:
   version "2.0.0"
