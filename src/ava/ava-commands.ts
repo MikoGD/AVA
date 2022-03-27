@@ -122,10 +122,8 @@ function handleTagsIntent(
   entities: Entity[],
   modalOptions: ModalOptions
 ): React.ReactElement[] | void {
-  console.log('[badge] - handleTagsIntent', entities);
   if (entities.length > 0) {
     if (entities.some(({ type }) => type === 'hide_tags')) {
-      console.log('[badge] clearing badges');
       Store.dispatch(clearBadges());
       return;
     }
@@ -140,7 +138,6 @@ function handleTagsIntent(
     (anchorElement: HTMLAnchorElement, index) => {
       const { left, top, width, height } =
         anchorElement.getBoundingClientRect();
-      console.log('[badge] styles: ', styles.tagBadge);
 
       let x = left;
       let y = top;
