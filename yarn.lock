@@ -669,6 +669,14 @@
   dependencies:
     "@sinonjs/commons" "^1.7.0"
 
+"@speechly/browser-client@1.4.0":
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/@speechly/browser-client/-/browser-client-1.4.0.tgz#c69a12b313b77c8cf19c59b7b84be5fd677db2e3"
+  integrity sha512-5t45qGyUeedVnD+80IPC2uv5Bhd37MgCXUjpUDpDYL436RBVef3IlW8+GpWkDolV3RMpyuNrKvH/gtU6oOZHDA==
+  dependencies:
+    base-64 "^0.1.0"
+    uuid "^8.0.0"
+
 "@speechly/browser-client@^1.1.0":
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/@speechly/browser-client/-/browser-client-1.1.0.tgz#4714470d5aec332b47f3e4f36fad59291b9d9516"
@@ -677,6 +685,13 @@
     base-64 "^0.1.0"
     locale-code "^2.0.2"
     uuid "^8.0.0"
+
+"@speechly/react-client@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@speechly/react-client/-/react-client-2.0.0.tgz#91ab5e2e9f61536b4bda1a72877379873a0bb26d"
+  integrity sha512-rs2H+e59oo/4dufUqW9pPmqEf8wkNrPZIqp+VuQWCFWZoSHDeRLNpBsM1LNMCjvStuioY1lpGUIzlK2oOB+MNg==
+  dependencies:
+    "@speechly/browser-client" "1.4.0"
 
 "@tootallnate/once@1":
   version "1.1.2"

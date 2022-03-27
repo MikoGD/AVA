@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
+import { SpeechProvider } from '@speechly/react-client';
 import Ava from './ava';
 import Store from './store';
 /* eslint-disable */
@@ -10,9 +11,11 @@ import styles from './content_script.scss';
 
 function App(): React.ReactElement {
   return (
-    <Provider store={Store}>
-      <Ava />
-    </Provider>
+    <SpeechProvider appId="5a17225f-f487-454f-9e3e-87e18e4994e7" debug>
+      <Provider store={Store}>
+        <Ava />
+      </Provider>
+    </SpeechProvider>
   );
 }
 
