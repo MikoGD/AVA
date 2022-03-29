@@ -1,4 +1,5 @@
-import { Word } from '@speechly/browser-client';
+import { Word } from '@speechly/react-client';
+import { Tag } from './ava/ava-types';
 
 export function wordsToSentence(words: Word[]) {
   let firstWord = true;
@@ -21,16 +22,81 @@ export function wordsToSentence(words: Word[]) {
   }, '');
 }
 
-/* Returns the scrollHeight of the tallest child of node given */
-export function getMaxChildScrollHeight<T extends HTMLElement>(parent: T) {
+/* Returns the scrollHeight of the tallest child and child itself of node given */
+export function getMaxChildScrollHeight<T extends HTMLElement>(
+  parent: T
+): [number, HTMLElement] {
   const children = Array.from(parent.children);
   let maxScrollHeight = 0;
+  let tallestChild: HTMLElement = parent;
 
   children.forEach((child) => {
     if (maxScrollHeight < child.scrollHeight) {
       maxScrollHeight = child.scrollHeight;
+      tallestChild = child as HTMLElement;
     }
   });
 
-  return maxScrollHeight;
+  return [maxScrollHeight, tallestChild];
+}
+
+export function onScrollStopListener<T extends HTMLElement | Window>(
+  element: T,
+  onScrollCallback: () => void,
+  waitDuration = 200
+) {
+  let timeout: NodeJS.Timeout | null = null;
+
+  function handleOnScroll() {
+    if (timeout) {
+      clearTimeout(timeout);
+    }
+
+    timeout = setTimeout(onScrollCallback, waitDuration);
+  }
+
+  element.addEventListener('scroll', handleOnScroll);
+
+  return () => element.removeEventListener('scroll', handleOnScroll);
+}
+
+export function createTags() {
+  const tags: Tag[] = [];
+
+  Array.from(document.getElementsByTagName('a')).forEach(
+    (anchorElement: HTMLAnchorElement, index) => {
+      const { left, top, width, height } =
+        anchorElement.getBoundingClientRect();
+
+      let x = left;
+      let y = top;
+
+      if (width < 50) {
+        let leftPosition = left - 12.5;
+
+        if (width < 25) {
+          leftPosition = left - 25;
+        }
+
+        x = leftPosition < 0 ? 0 : leftPosition;
+      }
+
+      if (height < 50) {
+        let topPosition = top - 12.5;
+
+        if (height < 25) {
+          topPosition = top - 25;
+        }
+
+        y = topPosition < 0 ? 0 : topPosition;
+      }
+
+      tags.push({
+        style: { left: x, top: y },
+        children: `${index}`,
+      });
+    }
+  );
+
+  return tags;
 }

@@ -1,10 +1,12 @@
 import React, { ReactElement, useEffect, useRef, useState } from 'react';
 import Loader from 'react-spinners/PulseLoader';
 import { useSelector } from 'react-redux';
-import { TagsState } from '../../store/store';
+import { TagsState, setTags } from '../../store/store';
 import { Modal, ModalHeader, ModalBody } from '../../modal';
-import { Badge } from '../ava-types';
+import { Tag } from '../ava-types';
 import styles from './tags.module.scss';
+import { createTags, onScrollStopListener } from '../../utils';
+import Store from '../../store';
 
 interface OriginalTags {
   [id: string]: Node;
@@ -19,34 +21,27 @@ const textElements = ['P', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6'];
 
 export function Tags({ isTagsOpen }: TagsProps): React.ReactElement<TagsProps> {
   // states
-  const badges = useSelector<TagsState, Badge[]>((state) => state.badges);
-  const [badgesElement, setBadgesElement] = useState<ReactElement[] | null>(
-    null
-  );
-  const [tags, setTags] = useState<JSX.Element[] | null>(null);
-  const [originalTags, setOriginalTags] = useState<OriginalTags | null>();
+  const { tags, showTags } = useSelector<
+    TagsState,
+    { tags: Tag[]; showTags: boolean }
+  >((state) => state);
+  const [tagElements, setTagElements] = useState<ReactElement[] | null>(null);
+  const [links, setLinks] = useState<JSX.Element[] | null>(null);
+  const [originalLinks, setOriginalLinks] = useState<OriginalTags | null>();
   // Refs
   const modalBodyRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    console.log('[badges] - useEffect, badges: ', badges);
-    if (badges.length > 0) {
-      const badgesElementTemp: ReactElement[] = badges.map((badge) => {
-        console.log(badge);
-        return (
-          <span
-            {...badge}
-            className={styles.tagBadge}
-            key={`${badge.children}`}
-          />
-        );
-      });
+    if (tags.length > 0) {
+      const newTagElements: ReactElement[] = tags.map((tag) => (
+        <span {...tag} className={styles.tag} key={`${tag.children}`} />
+      ));
 
-      setBadgesElement(badgesElementTemp);
+      setTagElements(newTagElements);
     } else {
-      setBadgesElement(null);
+      setTagElements(null);
     }
-  }, [badges]);
+  }, [tags]);
 
   useEffect(() => {
     if (isTagsOpen) {
@@ -82,7 +77,7 @@ export function Tags({ isTagsOpen }: TagsProps): React.ReactElement<TagsProps> {
         if (displayText) {
           /* eslint-disable react/self-closing-comp */
           validTags.push(
-            <div id={id} className={styles.tag}>
+            <div id={id} className={styles.linkContainer}>
               <p key={id}>
                 {`${index}.`} {displayText}
               </p>
@@ -97,14 +92,14 @@ export function Tags({ isTagsOpen }: TagsProps): React.ReactElement<TagsProps> {
         }
       });
 
-      setTags(validTags);
-      setOriginalTags(ogTags);
+      setLinks(validTags);
+      setOriginalLinks(ogTags);
     }
   }, [isTagsOpen]);
 
   useEffect(() => {
-    if (originalTags) {
-      Object.entries(originalTags).forEach(([id, anchorElement]) => {
+    if (originalLinks) {
+      Object.entries(originalLinks).forEach(([id, anchorElement]) => {
         const tag = document.getElementById(id);
         if (tag) {
           const ogTagContainer = tag.getElementsByClassName(
@@ -121,20 +116,34 @@ export function Tags({ isTagsOpen }: TagsProps): React.ReactElement<TagsProps> {
         }
       });
     }
-  }, [originalTags]);
+  }, [originalLinks]);
+
+  useEffect(() => {
+    const removeOnScrollListener = onScrollStopListener(window, () => {
+      if (showTags) {
+        const newTags = createTags();
+
+        Store.dispatch(setTags(newTags));
+      }
+    });
+
+    return () => {
+      removeOnScrollListener();
+    };
+  }, [showTags]);
 
   return (
-    <>
-      {badgesElement}
+    <div>
+      {showTags && tagElements}
       {isTagsOpen && (
         <Modal>
           <ModalHeader>Tags</ModalHeader>
           <ModalBody ref={modalBodyRef}>
-            {tags !== null ? tags : <Loader />}
+            {links !== null ? links : <Loader />}
           </ModalBody>
         </Modal>
       )}
-    </>
+    </div>
   );
 }
 

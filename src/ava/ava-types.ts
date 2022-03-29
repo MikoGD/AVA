@@ -6,7 +6,7 @@ export interface ModalOptions {
   closeTagModal: () => void;
 }
 
-export interface Badge {
+export interface Tag {
   children: ReactNode;
   style: {
     top: number;

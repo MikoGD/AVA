@@ -1,27 +1,34 @@
 import { createSlice, PayloadAction, configureStore } from '@reduxjs/toolkit';
-import { Badge } from '../ava/ava-types';
+import { Tag } from '../ava/ava-types';
 
 export interface TagsState {
-  badges: Badge[];
+  tags: Tag[];
+  showTags: boolean;
 }
 
 const tagsInitialState = {
-  badges: [],
+  tags: [],
+  showTags: false,
 };
 
 const tagsSlice = createSlice({
   name: 'tags',
   initialState: tagsInitialState,
   reducers: {
-    setBadges(state: TagsState, action: PayloadAction<Badge[]>) {
-      state.badges = action.payload;
+    setTags(state: TagsState, action: PayloadAction<Tag[]>) {
+      state.tags = action.payload;
+      state.showTags = true;
     },
-    clearBadges(state: TagsState) {
-      state.badges = [];
+    clearTags(state: TagsState, action: PayloadAction<boolean>) {
+      if (action.payload) {
+        state.showTags = false;
+      }
+
+      state.tags = [];
     },
   },
 });
 
-export const { clearBadges, setBadges } = tagsSlice.actions;
+export const { clearTags, setTags } = tagsSlice.actions;
 
 export default configureStore(tagsSlice);

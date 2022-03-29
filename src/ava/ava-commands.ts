@@ -1,16 +1,20 @@
-import { Segment, Entity } from '@speechly/browser-client';
+import { SpeechSegment, Entity } from '@speechly/react-client';
 import React from 'react';
-import { getMaxChildScrollHeight } from '../utils';
-import { Badge, ModalOptions } from './ava-types';
-import Store, { clearBadges, setBadges } from '../store';
-import styles from './ava.module.scss';
+import { createTags, getMaxChildScrollHeight } from '../utils';
+import { Tag, ModalOptions } from './ava-types';
+import Store, { clearTags, setTags } from '../store';
 
 function handlePositionScroll(position: string) {
+  Store.dispatch(clearTags(false));
+
   const body = document.getElementsByTagName('body')[0];
   let maxHeight = body.scrollHeight;
+  let tallestChild: HTMLElement | null = null;
 
   if (maxHeight === 0) {
-    maxHeight = getMaxChildScrollHeight(body);
+    const [height, child] = getMaxChildScrollHeight(body);
+    maxHeight = height;
+    tallestChild = child;
   }
 
   let scrollOptions: ScrollToOptions = {
@@ -32,6 +36,8 @@ function handlePositionScroll(position: string) {
 }
 
 function handleDirectionScroll(direction: string) {
+  Store.dispatch(clearTags(false));
+
   const verticalIncrement = window.visualViewport.height / 2;
   const horizontalIncrement = window.visualViewport.width / 2;
 
@@ -61,9 +67,14 @@ function handleDirectionScroll(direction: string) {
   window.scrollBy(scrollOptions);
 }
 
-function handleScrollIntent(segment: Segment) {
+function handleScrollIntent(segment: SpeechSegment) {
   const { entities } = segment;
-  console.log('[scroll] - entities', entities);
+
+  if (entities.length === 0) {
+    console.error('invalid entity');
+    return;
+  }
+
   switch (entities[0].type) {
     case 'position':
       handlePositionScroll(entities[0].value.toLowerCase());
@@ -124,7 +135,7 @@ function handleTagsIntent(
 ): React.ReactElement[] | void {
   if (entities.length > 0) {
     if (entities.some(({ type }) => type === 'hide_tags')) {
-      Store.dispatch(clearBadges());
+      Store.dispatch(clearTags(true));
       return;
     }
 
@@ -132,47 +143,15 @@ function handleTagsIntent(
     return;
   }
 
-  const badges: Badge[] = [];
+  const tags = createTags();
 
-  Array.from(document.getElementsByTagName('a')).forEach(
-    (anchorElement: HTMLAnchorElement, index) => {
-      const { left, top, width, height } =
-        anchorElement.getBoundingClientRect();
-
-      let x = left;
-      let y = top;
-
-      if (width < 50) {
-        let leftPosition = left - 12.5;
-
-        if (width < 25) {
-          leftPosition = left - 25;
-        }
-
-        x = leftPosition < 0 ? 0 : leftPosition;
-      }
-
-      if (height < 50) {
-        let topPosition = top - 12.5;
-
-        if (height < 25) {
-          topPosition = top - 25;
-        }
-
-        y = topPosition < 0 ? 0 : topPosition;
-      }
-
-      badges.push({
-        style: { left: x, top: y },
-        children: `${index}`,
-      });
-    }
-  );
-
-  Store.dispatch(setBadges(badges));
+  Store.dispatch(setTags(tags));
 }
 
-export function processSegment(segment: Segment, modalOptions: ModalOptions) {
+export function processSegment(
+  segment: SpeechSegment,
+  modalOptions: ModalOptions
+) {
   switch (segment.intent.intent) {
     case 'open_website':
       window.location.href = `https://${segment.entities[0].value.toLowerCase()}.com`;
