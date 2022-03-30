@@ -17,6 +17,7 @@ interface ValidTags {
 interface TagsProps {
   isTagsModalOpen: boolean;
   showTags: boolean;
+  renderTags: boolean;
   setShowTags: (value: boolean) => void;
   linkIndex: number | null;
 }
@@ -26,12 +27,16 @@ const textElements = ['P', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6'];
 export function Tags({
   isTagsModalOpen,
   showTags,
+  renderTags,
   setShowTags,
   linkIndex,
 }: TagsProps): React.ReactElement<TagsProps> {
   // states
   const [tagElements, setTagElements] = useState<ReactElement[] | null>(null);
   const [validTags, setValidTags] = useState<ValidTags | null>(null);
+  const [removeListener, setRemoveListener] = useState<(() => void) | null>(
+    null
+  );
   // Refs
   const modalBodyRef = useRef<HTMLDivElement | null>(null);
 
@@ -149,18 +154,21 @@ export function Tags({
   }, [showTags]);
 
   useEffect(() => {
+    console.log('[useEffect] - showTags');
     const removeOnScrollListener = onScrollStopListener(window, () => {
+      console.log('[scroll] - showTags true');
       setShowTags(true);
     });
 
     return () => {
+      console.log('[scroll] - removing listener');
       removeOnScrollListener();
     };
   }, [showTags]);
 
   return (
     <div>
-      {showTags && tagElements}
+      {showTags && renderTags && tagElements}
       <Modal isOpen={isTagsModalOpen}>
         <ModalHeader>Tags</ModalHeader>
         <ModalBody ref={modalBodyRef}>

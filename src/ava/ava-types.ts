@@ -8,6 +8,7 @@ export interface ModalOptions {
 
 export interface AvaOptions {
   modalOptions: ModalOptions;
+  setRenderTag: (value: boolean) => void;
   setShowTag: (value: boolean) => void;
   setContextIndex: (index: number) => void;
 }

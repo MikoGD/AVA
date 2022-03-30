@@ -16,6 +16,7 @@ export default function App(): React.ReactElement {
   // useStates
   const [speech, setSpeech] = useState('');
   const [isTagsModalOpen, setIsTagsModalOpen] = useState(false);
+  const [renderTags, setRenderTags] = useState(false);
   const [showTags, setShowTags] = useState(false);
   const [contextIndex, setContextIndex] = useState<number | null>(null);
 
@@ -24,6 +25,7 @@ export default function App(): React.ReactElement {
       openTagModal: () => setIsTagsModalOpen(true),
       closeTagModal: () => setIsTagsModalOpen(false),
     },
+    setRenderTag: (value: boolean) => setRenderTags(value),
     setShowTag: (value: boolean) => setShowTags(value),
     setContextIndex: (index: number) => {
       setContextIndex(index);
@@ -107,6 +109,7 @@ export default function App(): React.ReactElement {
       <Tags
         isTagsModalOpen={isTagsModalOpen}
         showTags={showTags}
+        renderTags={renderTags}
         setShowTags={(value: boolean) => setShowTags(value)}
         linkIndex={contextIndex}
       />

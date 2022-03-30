@@ -132,6 +132,7 @@ function handleTagsIntent(
 ): React.ReactElement[] | void {
   if (entities.length > 0) {
     if (entities.some(({ type }) => type === 'hide_tags')) {
+      options.setRenderTag(false);
       options.setShowTag(false);
       return;
     }
@@ -140,6 +141,7 @@ function handleTagsIntent(
     return;
   }
 
+  options.setRenderTag(true);
   options.setShowTag(true);
 }
 
