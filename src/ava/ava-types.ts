@@ -6,6 +6,12 @@ export interface ModalOptions {
   closeTagModal: () => void;
 }
 
+export interface AvaOptions {
+  modalOptions: ModalOptions;
+  setShowTag: (value: boolean) => void;
+  setContextIndex: (index: number) => void;
+}
+
 export interface Tag {
   children: ReactNode;
   style: {

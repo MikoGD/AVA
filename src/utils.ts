@@ -60,43 +60,40 @@ export function onScrollStopListener<T extends HTMLElement | Window>(
   return () => element.removeEventListener('scroll', handleOnScroll);
 }
 
-export function createTags() {
+export function createTags(elementsToTag: Element[]) {
   const tags: Tag[] = [];
 
-  Array.from(document.getElementsByTagName('a')).forEach(
-    (anchorElement: HTMLAnchorElement, index) => {
-      const { left, top, width, height } =
-        anchorElement.getBoundingClientRect();
+  elementsToTag.forEach((anchorElement: Element, index) => {
+    const { left, top, width, height } = anchorElement.getBoundingClientRect();
 
-      let x = left;
-      let y = top;
+    let x = left;
+    let y = top;
 
-      if (width < 50) {
-        let leftPosition = left - 12.5;
+    if (width < 50) {
+      let leftPosition = left - 12.5;
 
-        if (width < 25) {
-          leftPosition = left - 25;
-        }
-
-        x = leftPosition < 0 ? 0 : leftPosition;
+      if (width < 25) {
+        leftPosition = left - 25;
       }
 
-      if (height < 50) {
-        let topPosition = top - 12.5;
-
-        if (height < 25) {
-          topPosition = top - 25;
-        }
-
-        y = topPosition < 0 ? 0 : topPosition;
-      }
-
-      tags.push({
-        style: { left: x, top: y },
-        children: `${index}`,
-      });
+      x = leftPosition < 0 ? 0 : leftPosition;
     }
-  );
+
+    if (height < 50) {
+      let topPosition = top - 12.5;
+
+      if (height < 25) {
+        topPosition = top - 25;
+      }
+
+      y = topPosition < 0 ? 0 : topPosition;
+    }
+
+    tags.push({
+      style: { left: x, top: y },
+      children: `${index}`,
+    });
+  });
 
   return tags;
 }

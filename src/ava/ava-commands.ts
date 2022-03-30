@@ -1,20 +1,17 @@
 import { SpeechSegment, Entity } from '@speechly/react-client';
 import React from 'react';
-import { createTags, getMaxChildScrollHeight } from '../utils';
-import { Tag, ModalOptions } from './ava-types';
-import Store, { clearTags, setTags } from '../store';
+import { getMaxChildScrollHeight } from '../utils';
+import { AvaOptions, ModalOptions } from './ava-types';
 
-function handlePositionScroll(position: string) {
-  Store.dispatch(clearTags(false));
+function handlePositionScroll(position: string, options: AvaOptions) {
+  options.setShowTag(false);
 
   const body = document.getElementsByTagName('body')[0];
   let maxHeight = body.scrollHeight;
-  let tallestChild: HTMLElement | null = null;
 
   if (maxHeight === 0) {
-    const [height, child] = getMaxChildScrollHeight(body);
+    const [height] = getMaxChildScrollHeight(body);
     maxHeight = height;
-    tallestChild = child;
   }
 
   let scrollOptions: ScrollToOptions = {
@@ -35,8 +32,8 @@ function handlePositionScroll(position: string) {
   window.scrollTo(scrollOptions);
 }
 
-function handleDirectionScroll(direction: string) {
-  Store.dispatch(clearTags(false));
+function handleDirectionScroll(direction: string, options: AvaOptions) {
+  options.setShowTag(false);
 
   const verticalIncrement = window.visualViewport.height / 2;
   const horizontalIncrement = window.visualViewport.width / 2;
@@ -67,7 +64,7 @@ function handleDirectionScroll(direction: string) {
   window.scrollBy(scrollOptions);
 }
 
-function handleScrollIntent(segment: SpeechSegment) {
+function handleScrollIntent(segment: SpeechSegment, options: AvaOptions) {
   const { entities } = segment;
 
   if (entities.length === 0) {
@@ -77,10 +74,10 @@ function handleScrollIntent(segment: SpeechSegment) {
 
   switch (entities[0].type) {
     case 'position':
-      handlePositionScroll(entities[0].value.toLowerCase());
+      handlePositionScroll(entities[0].value.toLowerCase(), options);
       break;
     case 'direction':
-      handleDirectionScroll(entities[0].value.toLowerCase());
+      handleDirectionScroll(entities[0].value.toLowerCase(), options);
       break;
     default:
       console.error('unhandled scroll entities: ', entities);
@@ -131,36 +128,35 @@ function handleModalOptions(entities: Entity[], modalOptions: ModalOptions) {
 
 function handleTagsIntent(
   entities: Entity[],
-  modalOptions: ModalOptions
+  options: AvaOptions
 ): React.ReactElement[] | void {
   if (entities.length > 0) {
     if (entities.some(({ type }) => type === 'hide_tags')) {
-      Store.dispatch(clearTags(true));
+      options.setShowTag(false);
       return;
     }
 
-    handleModalOptions(entities, modalOptions);
+    handleModalOptions(entities, options.modalOptions);
     return;
   }
 
-  const tags = createTags();
-
-  Store.dispatch(setTags(tags));
+  options.setShowTag(true);
 }
 
-export function processSegment(
-  segment: SpeechSegment,
-  modalOptions: ModalOptions
-) {
+export function processSegment(segment: SpeechSegment, options: AvaOptions) {
   switch (segment.intent.intent) {
     case 'open_website':
       window.location.href = `https://${segment.entities[0].value.toLowerCase()}.com`;
       break;
     case 'scroll':
-      handleScrollIntent(segment);
+      handleScrollIntent(segment, options);
       break;
     case 'tags':
-      handleTagsIntent(segment.entities, modalOptions);
+      handleTagsIntent(segment.entities, options);
+      break;
+    case 'index':
+      console.log('[processSegment] - index intent', segment.entities[0]);
+      options.setContextIndex(Number(segment.entities[0].value));
       break;
     default:
       console.error('unhandled intent: ', segment.intent.intent);

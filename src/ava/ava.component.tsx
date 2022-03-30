@@ -8,18 +8,26 @@ import { wordsToSentence } from '../utils';
 // @ts-ignore
 import styles from './ava.module.scss';
 import { processSegment } from './ava-commands';
-import { ModalOptions } from './ava-types';
+import { AvaOptions } from './ava-types';
 import Tags from './tags';
 /* eslint-enable */
 
 export default function App(): React.ReactElement {
   // useStates
   const [speech, setSpeech] = useState('');
-  const [isTagsOpen, setIsTagsOpen] = useState(false);
+  const [isTagsModalOpen, setIsTagsModalOpen] = useState(false);
+  const [showTags, setShowTags] = useState(false);
+  const [contextIndex, setContextIndex] = useState<number | null>(null);
 
-  const modalOptions: ModalOptions = {
-    openTagModal: () => setIsTagsOpen(true),
-    closeTagModal: () => setIsTagsOpen(false),
+  const options: AvaOptions = {
+    modalOptions: {
+      openTagModal: () => setIsTagsModalOpen(true),
+      closeTagModal: () => setIsTagsModalOpen(false),
+    },
+    setShowTag: (value: boolean) => setShowTags(value),
+    setContextIndex: (index: number) => {
+      setContextIndex(index);
+    },
   };
 
   const { segment, clientState, startContext, stopContext, listening } =
@@ -39,7 +47,7 @@ export default function App(): React.ReactElement {
       setSpeech(dictation);
 
       if (isFinal) {
-        processSegment(segment, modalOptions);
+        processSegment(segment, options);
       }
     }
   }, [segment]);
@@ -96,7 +104,12 @@ export default function App(): React.ReactElement {
   /* eslint-disable */
   return (
     <>
-      <Tags isTagsOpen={isTagsOpen} />
+      <Tags
+        isTagsModalOpen={isTagsModalOpen}
+        showTags={showTags}
+        setShowTags={(value: boolean) => setShowTags(value)}
+        linkIndex={contextIndex}
+      />
       <div className={classnames(styles.app, listening && styles.active)}>
         {listening ? (
           <AvaTextComponent text={speech} />
