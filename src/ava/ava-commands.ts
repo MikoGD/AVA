@@ -146,7 +146,8 @@ function handleTagsIntent(
 export function processSegment(segment: SpeechSegment, options: AvaOptions) {
   switch (segment.intent.intent) {
     case 'open_website':
-      window.location.href = `https://${segment.entities[0].value.toLowerCase()}.com`;
+      console.log('[open_website] - entities', segment.entities);
+      window.location.href = `https://${segment.entities[0].value}`;
       break;
     case 'scroll':
       handleScrollIntent(segment, options);
