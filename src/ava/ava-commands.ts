@@ -1,7 +1,7 @@
 import { SpeechSegment, Entity } from '@speechly/react-client';
 import React from 'react';
 import { getMaxChildScrollHeight } from '../utils';
-import { AvaOptions, ModalOptions } from './ava-types';
+import { AvaOptions, INTENTS, ModalOptions } from './ava-types';
 
 function handlePositionScroll(position: string, options: AvaOptions) {
   options.setShowTag(false);
@@ -145,10 +145,59 @@ function handleTagsIntent(
   options.setShowTag(true);
 }
 
+function handleTabIntent(segment: SpeechSegment) {
+  console.log('[handleTabIntent] - ', segment);
+  let isCloseAction = false;
+  let indexEntityValue = -1;
+  let website = '';
+
+  segment.entities.forEach((entity) => {
+    const { type, value } = entity;
+
+    if (type === 'action') {
+      if (value.toLowerCase() === 'close') {
+        isCloseAction = true;
+      }
+    }
+
+    if (type === 'index') {
+      indexEntityValue = Number(entity.value);
+    }
+
+    if (type === 'website') {
+      website = entity.value;
+    }
+  });
+
+  if (isCloseAction) {
+    if (indexEntityValue) {
+      chrome.runtime.sendMessage({
+        intent: INTENTS.TAB,
+        action: 'close',
+        tabPosition: indexEntityValue,
+      });
+      return;
+    }
+
+    chrome.runtime.sendMessage({ intent: INTENTS.TAB, action: 'close' });
+    return;
+  }
+
+  if (indexEntityValue > 0) {
+    console.log(`[tab] - moving to tab ${indexEntityValue}`);
+    chrome.runtime.sendMessage({
+      intent: INTENTS.TAB,
+      action: 'open',
+      tabPosition: indexEntityValue,
+    });
+  } else {
+    chrome.runtime.sendMessage({ intent: INTENTS.TAB, action: 'new', website });
+  }
+}
+
 export function processSegment(segment: SpeechSegment, options: AvaOptions) {
   switch (segment.intent.intent) {
     case 'open_website':
-      console.log('[open_website] - entities', segment.entities);
       window.location.href = `https://${segment.entities[0].value}`;
       break;
     case 'scroll':
@@ -158,8 +207,10 @@ export function processSegment(segment: SpeechSegment, options: AvaOptions) {
       handleTagsIntent(segment.entities, options);
       break;
     case 'index':
-      console.log('[processSegment] - index intent', segment.entities[0]);
       options.setContextIndex(Number(segment.entities[0].value));
+      break;
+    case 'tab':
+      handleTabIntent(segment);
       break;
     default:
       console.error('unhandled intent: ', segment.intent.intent);

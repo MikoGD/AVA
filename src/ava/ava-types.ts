@@ -1,5 +1,13 @@
 import { ReactNode } from 'react';
 
+export enum INTENTS {
+  OPEN_WEBSITE = 'OPEN_WEBSITE',
+  SCROLL = 'SCROLL',
+  TAGS = 'TAGS',
+  REFRESH = 'REFRESH',
+  TAB = 'TABS',
+  INDEX = 'INDEX',
+}
 export interface ModalOptions {
   [key: string]: () => void;
   openTagModal: () => void;
