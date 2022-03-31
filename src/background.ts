@@ -53,6 +53,12 @@ async function handleTabsIntent(
   }
 }
 
+function handleRefreshIntent(sender: chrome.runtime.MessageSender) {
+  if (sender && sender.tab && sender.tab.id) {
+    chrome.tabs.reload(sender.tab.id);
+  }
+}
+
 chrome.runtime.onInstalled.addListener(() => {
   console.log('Ava installed');
 });
@@ -65,6 +71,9 @@ chrome.runtime.onMessage.addListener((req: Message, sender) => {
   switch (intent) {
     case INTENTS.TAB:
       handleTabsIntent(req, sender);
+      break;
+    case INTENTS.REFRESH:
+      handleRefreshIntent(sender);
       break;
     default:
       console.error('[background] - unhandled intent: ', intent);
