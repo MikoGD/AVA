@@ -97,3 +97,65 @@ export function createTags(elementsToTag: Element[]) {
 
   return tags;
 }
+
+function checkElementInView<T extends HTMLElement>(element: T) {
+  const { top, left, bottom, right } = element.getBoundingClientRect();
+
+  return (
+    top >= 0 &&
+    left >= 0 &&
+    bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+    right <= (window.innerWidth || document.documentElement.clientWidth)
+  );
+}
+
+export function validateAnchorTag(anchor: HTMLAnchorElement) {
+  // const [maxHeight, scrollElement] = getMaxChildScrollHeight(document.body);
+
+  if (!checkElementInView(anchor)) {
+    return false;
+  }
+
+  const { visibility, display, overflow, textOverflow } =
+    window.getComputedStyle(anchor);
+  if (
+    visibility === 'hidden' ||
+    display === 'none' ||
+    (overflow === 'hidden' && textOverflow !== 'ellipsis')
+  ) {
+    return false;
+  }
+
+  const ariaLabel = anchor.getAttribute('aria-label')?.trim();
+  const titleAttr = anchor.getAttribute('title')?.trim();
+  const text = anchor.innerText;
+
+  if (!ariaLabel && !titleAttr && !text) {
+    return false;
+  }
+
+  let parent = anchor.parentElement;
+  const limit = 1;
+  let count = 0;
+
+  while (parent && count < limit) {
+    const {
+      visibility: parentVisibility,
+      display: parentDisplay,
+      overflow: parentOverflow,
+      textOverflow: parentTextOverflow,
+    } = window.getComputedStyle(parent);
+    if (
+      parentVisibility === 'hidden' ||
+      parentDisplay === 'none' ||
+      (parentOverflow === 'hidden' && parentTextOverflow !== 'ellipsis')
+    ) {
+      return false;
+    }
+
+    parent = parent.parentElement;
+    count += 1;
+  }
+
+  return true;
+}

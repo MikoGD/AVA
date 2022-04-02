@@ -2,7 +2,7 @@ import React, { ReactElement, useEffect, useRef, useState } from 'react';
 import Loader from 'react-spinners/PulseLoader';
 import { Modal, ModalHeader, ModalBody } from '../../modal';
 import styles from './tags.module.scss';
-import { onScrollStopListener } from '../../utils';
+import { onScrollStopListener, validateAnchorTag } from '../../utils';
 
 interface ValidTag {
   index: number;
@@ -34,9 +34,6 @@ export function Tags({
   // states
   const [tagElements, setTagElements] = useState<ReactElement[] | null>(null);
   const [validTags, setValidTags] = useState<ValidTags | null>(null);
-  const [removeListener, setRemoveListener] = useState<(() => void) | null>(
-    null
-  );
   // Refs
   const modalBodyRef = useRef<HTMLDivElement | null>(null);
 
@@ -45,37 +42,35 @@ export function Tags({
     let index = 0;
 
     Array.from(document.getElementsByTagName('a')).forEach((tag) => {
-      const ariaLabel = tag.getAttribute('aria-label')?.trim();
-      const titleAttr = tag.getAttribute('title')?.trim();
-      let displayText = '';
+      const isValidAnchorTag = validateAnchorTag(tag);
 
-      if (ariaLabel) {
-        displayText = ariaLabel;
-      } else if (titleAttr) {
-        displayText = titleAttr;
-      } else {
-        displayText = tag.text?.trim();
+      if (isValidAnchorTag) {
+        const ariaLabel = tag.getAttribute('aria-label')?.trim();
+        const titleAttr = tag.getAttribute('title')?.trim();
+        const text = tag.innerText.trim();
 
-        Array.from(tag.children).forEach((child) => {
-          if (textElements.includes(child.nodeName)) {
-            if (child.textContent) {
-              displayText = child.textContent;
-            }
-          }
-        });
-      }
+        let displayText = '';
 
-      const id = `${index}${displayText}`;
+        if (ariaLabel) {
+          displayText = ariaLabel;
+        } else if (titleAttr) {
+          displayText = titleAttr;
+        } else {
+          displayText = text;
+        }
 
-      if (displayText) {
-        const validTag: ValidTag = {
-          index,
-          displayText,
-          node: tag,
-        };
+        const id = `${index}${displayText}`;
 
-        newValidTags[id] = validTag;
-        index += 1;
+        if (displayText) {
+          const validTag: ValidTag = {
+            index,
+            displayText,
+            node: tag,
+          };
+
+          newValidTags[id] = validTag;
+          index += 1;
+        }
       }
     });
 
@@ -138,6 +133,8 @@ export function Tags({
           currValidTags
         ).map(([id, { node, index }]) => {
           const [left, top] = getTagPosition(node);
+          // console.log(`[tag] ${index}: `, node);
+          // console.log(`[tag] ${index}: `, window.getComputedStyle(node));
           return (
             <span style={{ left, top }} className={styles.tag} key={id}>
               {index}
