@@ -59,6 +59,25 @@ function handleRefreshIntent(sender: chrome.runtime.MessageSender) {
   }
 }
 
+function handleNavigationIntent(
+  req: Message,
+  sender: chrome.runtime.MessageSender
+) {
+  const { action } = req;
+
+  if (!sender.tab || !sender.tab.id) {
+    return;
+  }
+
+  if ('back previous'.includes(action)) {
+    chrome.tabs.goBack(sender.tab.id);
+  } else if ('forward next'.includes(action)) {
+    chrome.tabs.goForward(sender.tab.id);
+  } else {
+    console.error('[navigation] - invalid action', action);
+  }
+}
+
 chrome.runtime.onInstalled.addListener(() => {
   console.log('Ava installed');
 });
@@ -74,6 +93,9 @@ chrome.runtime.onMessage.addListener((req: Message, sender) => {
       break;
     case INTENTS.REFRESH:
       handleRefreshIntent(sender);
+      break;
+    case INTENTS.NAVIGATION:
+      handleNavigationIntent(req, sender);
       break;
     default:
       console.error('[background] - unhandled intent: ', intent);

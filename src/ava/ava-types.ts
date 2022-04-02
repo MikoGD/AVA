@@ -7,6 +7,7 @@ export enum INTENTS {
   REFRESH = 'REFRESH',
   TAB = 'TABS',
   INDEX = 'INDEX',
+  NAVIGATION = 'NAVIGATION',
 }
 export interface ModalOptions {
   [key: string]: () => void;

@@ -199,6 +199,19 @@ function handleRefreshIntent() {
   chrome.runtime.sendMessage({ intent: INTENTS.REFRESH });
 }
 
+function handleNavigationIntent(segment: SpeechSegment) {
+  if (segment.entities.length > 0) {
+    const { value } = segment.entities[0];
+
+    if (value) {
+      chrome.runtime.sendMessage({
+        intent: INTENTS.NAVIGATION,
+        action: value.toLowerCase(),
+      });
+    }
+  }
+}
+
 export function processSegment(segment: SpeechSegment, options: AvaOptions) {
   switch (segment.intent.intent) {
     case 'open_website':
@@ -218,6 +231,9 @@ export function processSegment(segment: SpeechSegment, options: AvaOptions) {
       break;
     case 'refresh':
       handleRefreshIntent();
+      break;
+    case 'navigation':
+      handleNavigationIntent(segment);
       break;
     default:
       console.error('unhandled intent: ', segment.intent.intent);

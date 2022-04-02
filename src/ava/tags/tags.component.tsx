@@ -154,14 +154,11 @@ export function Tags({
   }, [showTags]);
 
   useEffect(() => {
-    console.log('[useEffect] - showTags');
     const removeOnScrollListener = onScrollStopListener(window, () => {
-      console.log('[scroll] - showTags true');
       setShowTags(true);
     });
 
     return () => {
-      console.log('[scroll] - removing listener');
       removeOnScrollListener();
     };
   }, [showTags]);
