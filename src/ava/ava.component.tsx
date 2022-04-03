@@ -112,6 +112,7 @@ export default function App(): React.ReactElement {
         renderTags={renderTags}
         setShowTags={(value: boolean) => setShowTags(value)}
         linkIndex={contextIndex}
+        resetLinkIndex={() => setContextIndex(null)}
       />
       <div className={classnames(styles.app, listening && styles.active)}>
         {listening ? (

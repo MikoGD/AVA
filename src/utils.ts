@@ -1,5 +1,5 @@
 import { Word } from '@speechly/react-client';
-import { Tag } from './ava/ava-types';
+import { ReactElement } from 'react';
 import { ValidTag } from './ava/tags/tags.component';
 
 type AvailableInputTypesStr =
@@ -75,42 +75,59 @@ export function onScrollStopListener<T extends HTMLElement | Window>(
   return () => element.removeEventListener('scroll', handleOnScroll);
 }
 
-export function createTags(elementsToTag: Element[]) {
-  const tags: Tag[] = [];
+export function getTagPosition(elementToTag: Element) {
+  const { left, top, width, height } = elementToTag.getBoundingClientRect();
 
-  elementsToTag.forEach((anchorElement: Element, index) => {
-    const { left, top, width, height } = anchorElement.getBoundingClientRect();
+  let x = left;
+  let y = top;
 
-    let x = left;
-    let y = top;
+  if (width < 50) {
+    let leftPosition = left - 12.5;
 
-    if (width < 50) {
-      let leftPosition = left - 12.5;
-
-      if (width < 25) {
-        leftPosition = left - 25;
-      }
-
-      x = leftPosition < 0 ? 0 : leftPosition;
+    if (width < 25) {
+      leftPosition = left - 25;
     }
 
-    if (height < 50) {
-      let topPosition = top - 12.5;
+    x = leftPosition < 0 ? 0 : leftPosition;
+  }
 
-      if (height < 25) {
-        topPosition = top - 25;
-      }
+  if (height < 50) {
+    let topPosition = top - 12.5;
 
-      y = topPosition < 0 ? 0 : topPosition;
+    if (height < 25) {
+      topPosition = top - 25;
     }
 
-    tags.push({
-      style: { left: x, top: y },
-      children: `${index}`,
-    });
+    y = topPosition < 0 ? 0 : topPosition;
+  }
+
+  return [x, y];
+}
+
+export function getValidTagsFromPage() {
+  let allValidTags: ValidTag[] = [];
+  let index = 0;
+  const getValidTagFunctions = [
+    getValidAnchorTags,
+    getValidInputElements,
+    getValidDivElements,
+  ];
+
+  getValidTagFunctions.forEach((fn) => {
+    const [newValidTags, newIndex] = fn(index);
+    index = newIndex;
+    allValidTags = [...allValidTags, ...newValidTags];
   });
 
-  return tags;
+  return allValidTags.sort((a: ValidTag, b: ValidTag) => {
+    if (a.index < b.index) {
+      return -1;
+    } else if (a.index > b.index) {
+      return 1;
+    }
+
+    return 0;
+  });
 }
 
 function checkElementInView<T extends HTMLElement>(element: T) {
