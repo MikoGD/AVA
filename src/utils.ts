@@ -1,5 +1,6 @@
 import { Word } from '@speechly/react-client';
 import { Tag } from './ava/ava-types';
+import { ValidTag, ValidTags } from './ava/tags/tags.component';
 
 export function wordsToSentence(words: Word[]) {
   let firstWord = true;
@@ -158,4 +159,44 @@ export function validateAnchorTag(anchor: HTMLAnchorElement) {
   }
 
   return true;
+}
+
+export function getValidAnchorTags(startingIndex: number): [ValidTags, number] {
+  const newValidTags: ValidTags = {};
+  let index = startingIndex;
+
+  Array.from(document.getElementsByTagName('a')).forEach((tag) => {
+    const isValidAnchorTag = validateAnchorTag(tag);
+
+    if (isValidAnchorTag) {
+      const ariaLabel = tag.getAttribute('aria-label')?.trim();
+      const titleAttr = tag.getAttribute('title')?.trim();
+      const text = tag.innerText.trim();
+
+      let displayText = '';
+
+      if (ariaLabel) {
+        displayText = ariaLabel;
+      } else if (titleAttr) {
+        displayText = titleAttr;
+      } else {
+        displayText = text;
+      }
+
+      const id = `${index}${displayText}`;
+
+      if (displayText) {
+        const validTag: ValidTag = {
+          index,
+          displayText,
+          node: tag,
+        };
+
+        newValidTags[id] = validTag;
+        index += 1;
+      }
+    }
+  });
+
+  return [newValidTags, index];
 }

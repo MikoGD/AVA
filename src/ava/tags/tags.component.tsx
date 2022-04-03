@@ -2,15 +2,19 @@ import React, { ReactElement, useEffect, useRef, useState } from 'react';
 import Loader from 'react-spinners/PulseLoader';
 import { Modal, ModalHeader, ModalBody } from '../../modal';
 import styles from './tags.module.scss';
-import { onScrollStopListener, validateAnchorTag } from '../../utils';
+import {
+  getValidAnchorTags,
+  onScrollStopListener,
+  validateAnchorTag,
+} from '../../utils';
 
-interface ValidTag {
+export interface ValidTag {
   index: number;
   displayText: string;
   node: Element;
 }
 
-interface ValidTags {
+export interface ValidTags {
   [id: string]: ValidTag;
 }
 
@@ -38,43 +42,14 @@ export function Tags({
   const modalBodyRef = useRef<HTMLDivElement | null>(null);
 
   function getValidTagsFromPage() {
-    const newValidTags: ValidTags = {};
+    let allValidTags: ValidTags = {};
     let index = 0;
 
-    Array.from(document.getElementsByTagName('a')).forEach((tag) => {
-      const isValidAnchorTag = validateAnchorTag(tag);
+    const [newValidTags, newIndex] = getValidAnchorTags(0);
+    index = newIndex;
+    allValidTags = { ...allValidTags, ...newValidTags };
 
-      if (isValidAnchorTag) {
-        const ariaLabel = tag.getAttribute('aria-label')?.trim();
-        const titleAttr = tag.getAttribute('title')?.trim();
-        const text = tag.innerText.trim();
-
-        let displayText = '';
-
-        if (ariaLabel) {
-          displayText = ariaLabel;
-        } else if (titleAttr) {
-          displayText = titleAttr;
-        } else {
-          displayText = text;
-        }
-
-        const id = `${index}${displayText}`;
-
-        if (displayText) {
-          const validTag: ValidTag = {
-            index,
-            displayText,
-            node: tag,
-          };
-
-          newValidTags[id] = validTag;
-          index += 1;
-        }
-      }
-    });
-
-    return newValidTags;
+    return allValidTags;
   }
 
   useEffect(() => {
