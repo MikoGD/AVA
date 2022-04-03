@@ -318,3 +318,54 @@ export function getValidInputElements(
 
   return [newValidTags, index];
 }
+
+export function validateDivTag(div: HTMLDivElement) {
+  return checkElementVisibleOnScreen(div);
+}
+
+export function getValidDivElements(
+  startingIndex: number
+): [ValidTags, number] {
+  let newValidTags: ValidTags = {};
+  let index = startingIndex;
+
+  const divElements = Array.from<HTMLDivElement>(
+    document.getElementsByTagName('div')
+  ).filter((div) => {
+    const hasOnClick = Boolean(div.onclick);
+    const isControl = Boolean(
+      Array.from(div.attributes).find((attr) => {
+        if (
+          attr.name === 'aria-controls' ||
+          (attr.name === 'role' && attr.value === 'button')
+        ) {
+          return true;
+        }
+        return false;
+      })
+    );
+
+    if (hasOnClick || isControl) {
+      return true;
+    }
+
+    return false;
+  });
+
+  divElements.forEach((div) => {
+    if (validateDivTag(div)) {
+      const id = `${index}{div.innertText}`;
+
+      const newValidTag: ValidTag = {
+        index,
+        displayText: div.innerText,
+        node: div,
+      };
+
+      newValidTags[id] = newValidTag;
+      index += 1;
+    }
+  });
+
+  return [newValidTags, index];
+}

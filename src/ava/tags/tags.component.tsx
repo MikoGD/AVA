@@ -4,6 +4,7 @@ import { Modal, ModalHeader, ModalBody } from '../../modal';
 import styles from './tags.module.scss';
 import {
   getValidAnchorTags,
+  getValidDivElements,
   getValidInputElements,
   onScrollStopListener,
   validateAnchorTag,
@@ -45,10 +46,13 @@ export function Tags({
   function getValidTagsFromPage() {
     let allValidTags: ValidTags = {};
     let index = 0;
-    const getValidTagFunctions = [getValidAnchorTags, getValidInputElements];
+    const getValidTagFunctions = [
+      getValidAnchorTags,
+      getValidInputElements,
+      getValidDivElements,
+    ];
 
     getValidTagFunctions.forEach((fn) => {
-      console.log('[getValidTagFunctions]');
       const [newValidTags, newIndex] = fn(index);
       index = newIndex;
       allValidTags = { ...allValidTags, ...newValidTags };
@@ -107,6 +111,15 @@ export function Tags({
   useEffect(() => {
     if (showTags) {
       const currValidTags = getValidTagsFromPage();
+      // .sort((a: ValidTag, b: ValidTag) => {
+      //   if (a.index < b.index) {
+      //     return -1;
+      //   } else if (a.index > b.index) {
+      //     return 1;
+      //   }
+
+      //   return 0;
+      // });
 
       if (Object.keys(currValidTags).length > 0) {
         const newTagElements: ReactElement[] = Object.entries(
@@ -121,22 +134,22 @@ export function Tags({
             </span>
           );
         });
-
         setTagElements(newTagElements);
         setValidTags(currValidTags);
       }
     } else {
       setTagElements(null);
+      setValidTags(null);
     }
   }, [showTags]);
 
   useEffect(() => {
-    const removeOnScrollListener = onScrollStopListener(window, () => {
+    const removeOnScrollStopListener = onScrollStopListener(window, () => {
       setShowTags(true);
     });
 
     return () => {
-      removeOnScrollListener();
+      removeOnScrollStopListener();
     };
   }, [showTags]);
 
