@@ -11,13 +11,10 @@ import {
 } from '../../utils';
 
 export interface ValidTag {
+  id: string;
   index: number;
   displayText: string;
   node: Element;
-}
-
-export interface ValidTags {
-  [id: string]: ValidTag;
 }
 
 interface TagsProps {
@@ -39,12 +36,12 @@ export function Tags({
 }: TagsProps): React.ReactElement<TagsProps> {
   // states
   const [tagElements, setTagElements] = useState<ReactElement[] | null>(null);
-  const [validTags, setValidTags] = useState<ValidTags | null>(null);
+  const [validTags, setValidTags] = useState<ValidTag[] | null>(null);
   // Refs
   const modalBodyRef = useRef<HTMLDivElement | null>(null);
 
   function getValidTagsFromPage() {
-    let allValidTags: ValidTags = {};
+    let allValidTags: ValidTag[] = [];
     let index = 0;
     const getValidTagFunctions = [
       getValidAnchorTags,
@@ -55,10 +52,18 @@ export function Tags({
     getValidTagFunctions.forEach((fn) => {
       const [newValidTags, newIndex] = fn(index);
       index = newIndex;
-      allValidTags = { ...allValidTags, ...newValidTags };
+      allValidTags = [...allValidTags, ...newValidTags];
     });
 
-    return allValidTags;
+    return allValidTags.sort((a: ValidTag, b: ValidTag) => {
+      if (a.index < b.index) {
+        return -1;
+      } else if (a.index > b.index) {
+        return 1;
+      }
+
+      return 0;
+    });
   }
 
   useEffect(() => {
@@ -111,29 +116,18 @@ export function Tags({
   useEffect(() => {
     if (showTags) {
       const currValidTags = getValidTagsFromPage();
-      // .sort((a: ValidTag, b: ValidTag) => {
-      //   if (a.index < b.index) {
-      //     return -1;
-      //   } else if (a.index > b.index) {
-      //     return 1;
-      //   }
-
-      //   return 0;
-      // });
 
       if (Object.keys(currValidTags).length > 0) {
-        const newTagElements: ReactElement[] = Object.entries(
-          currValidTags
-        ).map(([id, { node, index }]) => {
-          const [left, top] = getTagPosition(node);
-          // console.log(`[tag] ${index}: `, node);
-          // console.log(`[tag] ${index}: `, window.getComputedStyle(node));
-          return (
-            <span style={{ left, top }} className={styles.tag} key={id}>
-              {index}
-            </span>
-          );
-        });
+        const newTagElements: ReactElement[] = currValidTags.map(
+          ({ id, node, index }) => {
+            const [left, top] = getTagPosition(node);
+            return (
+              <span style={{ left, top }} className={styles.tag} key={id}>
+                {index}
+              </span>
+            );
+          }
+        );
         setTagElements(newTagElements);
         setValidTags(currValidTags);
       }
@@ -160,8 +154,7 @@ export function Tags({
         <ModalHeader>Tags</ModalHeader>
         <ModalBody ref={modalBodyRef}>
           {validTags ? (
-            Object.entries(validTags).map(([id, validTag]) => {
-              const { index, displayText } = validTag;
+            validTags.map(({ id, index, displayText }) => {
               return (
                 <div key={id} id={id} className={styles.linkContainer}>
                   <p>

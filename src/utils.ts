@@ -1,6 +1,6 @@
 import { Word } from '@speechly/react-client';
 import { Tag } from './ava/ava-types';
-import { ValidTag, ValidTags } from './ava/tags/tags.component';
+import { ValidTag } from './ava/tags/tags.component';
 
 type AvailableInputTypesStr =
   | 'button'
@@ -231,8 +231,10 @@ export function validateAnchorTag(anchor: HTMLAnchorElement) {
   return true;
 }
 
-export function getValidAnchorTags(startingIndex: number): [ValidTags, number] {
-  const newValidTags: ValidTags = {};
+export function getValidAnchorTags(
+  startingIndex: number
+): [ValidTag[], number] {
+  const newValidTags: ValidTag[] = [];
   let index = startingIndex;
 
   Array.from(document.getElementsByTagName('a')).forEach((tag) => {
@@ -257,12 +259,13 @@ export function getValidAnchorTags(startingIndex: number): [ValidTags, number] {
 
       if (displayText) {
         const validTag: ValidTag = {
+          id,
           index,
           displayText,
           node: tag,
         };
 
-        newValidTags[id] = validTag;
+        newValidTags.push(validTag);
         index += 1;
       }
     }
@@ -287,8 +290,8 @@ function validateInputTag(input: AvailableInputTypes) {
 
 export function getValidInputElements(
   startingIndex: number
-): [ValidTags, number] {
-  const newValidTags: ValidTags = {};
+): [ValidTag[], number] {
+  const newValidTags: ValidTag[] = [];
   let index = startingIndex;
   const inputElements: AvailableInputTypesStr[] = [
     'button',
@@ -305,12 +308,13 @@ export function getValidInputElements(
         const id = `${index}${currInputElement.innerText}`;
 
         const newValidTag: ValidTag = {
+          id,
           index,
           displayText: currInputElement.innerText,
           node: currInputElement,
         };
 
-        newValidTags[id] = newValidTag;
+        newValidTags.push(newValidTag);
         index += 1;
       }
     });
@@ -325,8 +329,8 @@ export function validateDivTag(div: HTMLDivElement) {
 
 export function getValidDivElements(
   startingIndex: number
-): [ValidTags, number] {
-  let newValidTags: ValidTags = {};
+): [ValidTag[], number] {
+  let newValidTags: ValidTag[] = [];
   let index = startingIndex;
 
   const divElements = Array.from<HTMLDivElement>(
@@ -357,12 +361,13 @@ export function getValidDivElements(
       const id = `${index}{div.innertText}`;
 
       const newValidTag: ValidTag = {
+        id,
         index,
         displayText: div.innerText,
         node: div,
       };
 
-      newValidTags[id] = newValidTag;
+      newValidTags.push(newValidTag);
       index += 1;
     }
   });
