@@ -2,6 +2,20 @@ import { Word } from '@speechly/react-client';
 import { Tag } from './ava/ava-types';
 import { ValidTag, ValidTags } from './ava/tags/tags.component';
 
+type AvailableInputTypesStr =
+  | 'button'
+  | 'input'
+  | 'select'
+  | 'option'
+  | 'textarea';
+
+type AvailableInputTypes =
+  | HTMLButtonElement
+  | HTMLInputElement
+  | HTMLSelectElement
+  | HTMLOptionElement
+  | HTMLTextAreaElement;
+
 export function wordsToSentence(words: Word[]) {
   let firstWord = true;
   return words.reduce((currSentence, word) => {
@@ -100,30 +114,92 @@ export function createTags(elementsToTag: Element[]) {
 }
 
 function checkElementInView<T extends HTMLElement>(element: T) {
-  const { top, left, bottom, right } = element.getBoundingClientRect();
+  const boundingClient = element.getBoundingClientRect();
+  // Adjust coordinates to get more accurate results
+  const left = boundingClient.left + 1;
+  const right = boundingClient.right - 1;
+  const top = boundingClient.top + 1;
+  const bottom = boundingClient.bottom - 1;
 
-  return (
-    top >= 0 &&
-    left >= 0 &&
-    bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
-    right <= (window.innerWidth || document.documentElement.clientWidth)
-  );
+  const height = window.innerHeight || document.documentElement.clientHeight;
+  const width = window.innerWidth || document.documentElement.clientWidth;
+
+  const isTopGreater = top >= 0;
+  const isLeftGreater = left >= 0;
+  // const isBottomLower = bottom <= height;
+  // const isRightLower = right <= width;
+
+  // Don't care if the right side or bottom of the element is not in view
+  return isTopGreater && isLeftGreater;
 }
 
-export function validateAnchorTag(anchor: HTMLAnchorElement) {
-  // const [maxHeight, scrollElement] = getMaxChildScrollHeight(document.body);
-
-  if (!checkElementInView(anchor)) {
-    return false;
-  }
-
+function checkElementIsVisible<T extends HTMLElement>(element: T) {
   const { visibility, display, overflow, textOverflow } =
-    window.getComputedStyle(anchor);
+    window.getComputedStyle(element);
+
   if (
     visibility === 'hidden' ||
     display === 'none' ||
-    (overflow === 'hidden' && textOverflow !== 'ellipsis')
+    (overflow === 'hidden' && !'ellipsis clip'.includes(textOverflow))
   ) {
+    return false;
+  }
+
+  return true;
+}
+
+function checkElementIsOverlapped<T extends HTMLElement>(element: T) {
+  const boundingRect = element.getBoundingClientRect();
+  // Adjust coordinates to get more accurate results
+  const left = boundingRect.left + 1;
+  const right = boundingRect.right - 1;
+  const top = boundingRect.top + 1;
+  const bottom = boundingRect.bottom - 1;
+
+  const coords = [
+    [left, top],
+    [right, top],
+    [left, bottom],
+    [right, bottom],
+  ];
+
+  const isOverlapped = coords.map(([x, y]) => {
+    const overlappingElement = document.elementFromPoint(x, y);
+    const isOverlappingElementParent =
+      overlappingElement === element.parentElement;
+    const isChildOfElement = element.contains(overlappingElement);
+
+    if (
+      !isOverlappingElementParent &&
+      !isChildOfElement &&
+      overlappingElement &&
+      overlappingElement !== element
+    ) {
+      return true;
+    }
+
+    return false;
+  });
+
+  return isOverlapped.every((corner) => corner);
+}
+
+function checkElementVisibleOnScreen<T extends HTMLElement>(element: T) {
+  const isInView = checkElementInView(element);
+  const isVisibile = checkElementIsVisible(element);
+  const isOverlapped = checkElementIsOverlapped(element);
+
+  return isInView && isVisibile && !isOverlapped;
+}
+
+export function validateAnchorTag(anchor: HTMLAnchorElement) {
+  if (anchor.innerText === 'Gmail') {
+    /* eslint-disable */
+    debugger;
+    /* eslint-enable */
+  }
+
+  if (!checkElementVisibleOnScreen(anchor)) {
     return false;
   }
 
@@ -136,25 +212,19 @@ export function validateAnchorTag(anchor: HTMLAnchorElement) {
   }
 
   let parent = anchor.parentElement;
-  const limit = 1;
+  const limit = 5;
   let count = 0;
+  let isDocumentElement = parent === document.documentElement;
+  let isBody = parent === document.body;
 
-  while (parent && count < limit) {
-    const {
-      visibility: parentVisibility,
-      display: parentDisplay,
-      overflow: parentOverflow,
-      textOverflow: parentTextOverflow,
-    } = window.getComputedStyle(parent);
-    if (
-      parentVisibility === 'hidden' ||
-      parentDisplay === 'none' ||
-      (parentOverflow === 'hidden' && parentTextOverflow !== 'ellipsis')
-    ) {
+  while (parent && count < limit && !isDocumentElement && !isBody) {
+    if (!checkElementVisibleOnScreen(parent)) {
       return false;
     }
 
     parent = parent.parentElement;
+    isDocumentElement = parent === document.documentElement;
+    isBody = parent === document.body;
     count += 1;
   }
 
@@ -196,6 +266,54 @@ export function getValidAnchorTags(startingIndex: number): [ValidTags, number] {
         index += 1;
       }
     }
+  });
+  console.log('[getValidAnchorTags] - newValidTags', newValidTags);
+
+  return [newValidTags, index];
+}
+
+function getInputElementsArr<T extends HTMLElement | HTMLTextAreaElement>(
+  inputType: AvailableInputTypesStr
+): T[] {
+  const inputElements = document.getElementsByTagName(
+    inputType
+  ) as HTMLCollectionOf<T>;
+  return Array.from<T>(inputElements);
+}
+
+function validateInputTag(input: AvailableInputTypes) {
+  return checkElementVisibleOnScreen(input);
+}
+
+export function getValidInputElements(
+  startingIndex: number
+): [ValidTags, number] {
+  const newValidTags: ValidTags = {};
+  let index = startingIndex;
+  const inputElements: AvailableInputTypesStr[] = [
+    'button',
+    'input',
+    'option',
+    'textarea',
+  ];
+
+  inputElements.forEach((tagName) => {
+    const currInputElements = getInputElementsArr<AvailableInputTypes>(tagName);
+
+    currInputElements.forEach((currInputElement) => {
+      if (validateInputTag(currInputElement)) {
+        const id = `${index}${currInputElement.innerText}`;
+
+        const newValidTag: ValidTag = {
+          index,
+          displayText: currInputElement.innerText,
+          node: currInputElement,
+        };
+
+        newValidTags[id] = newValidTag;
+        index += 1;
+      }
+    });
   });
 
   return [newValidTags, index];

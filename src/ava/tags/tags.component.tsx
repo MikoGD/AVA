@@ -4,6 +4,7 @@ import { Modal, ModalHeader, ModalBody } from '../../modal';
 import styles from './tags.module.scss';
 import {
   getValidAnchorTags,
+  getValidInputElements,
   onScrollStopListener,
   validateAnchorTag,
 } from '../../utils';
@@ -44,10 +45,14 @@ export function Tags({
   function getValidTagsFromPage() {
     let allValidTags: ValidTags = {};
     let index = 0;
+    const getValidTagFunctions = [getValidAnchorTags, getValidInputElements];
 
-    const [newValidTags, newIndex] = getValidAnchorTags(0);
-    index = newIndex;
-    allValidTags = { ...allValidTags, ...newValidTags };
+    getValidTagFunctions.forEach((fn) => {
+      console.log('[getValidTagFunctions]');
+      const [newValidTags, newIndex] = fn(index);
+      index = newIndex;
+      allValidTags = { ...allValidTags, ...newValidTags };
+    });
 
     return allValidTags;
   }
