@@ -20,6 +20,8 @@ export interface AvaOptions {
   setRenderTag: (value: boolean) => void;
   setShowTag: (value: boolean) => void;
   setContextIndex: (index: number) => void;
+  setDictation: (dictation: string) => void;
+  setSubmit: () => void;
 }
 
 export interface Tag {

@@ -26,6 +26,10 @@ interface TagsProps {
   setShowTags: (value: boolean) => void;
   linkIndex: number | null;
   resetLinkIndex: () => void;
+  dictation: string | null;
+  resetDictation: () => void;
+  submit: boolean;
+  resetSubmit: () => void;
 }
 
 function createTags(): [ValidTag[], ReactElement[]] | [] {
@@ -55,12 +59,39 @@ export function Tags({
   setShowTags,
   linkIndex,
   resetLinkIndex,
+  dictation,
+  resetDictation,
+  submit,
+  resetSubmit,
 }: TagsProps): React.ReactElement<TagsProps> {
   // states
   const [tagElements, setTagElements] = useState<ReactElement[] | null>(null);
   const [validTags, setValidTags] = useState<ValidTag[] | null>(null);
+  const [focusedTextInput, setFocusedTextInput] =
+    useState<HTMLInputElement | null>();
   // Refs
   const modalBodyRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (dictation && focusedTextInput) {
+      focusedTextInput.value = dictation;
+      resetDictation();
+    }
+  }, [dictation, focusedTextInput]);
+
+  useEffect(() => {
+    if (submit && focusedTextInput) {
+      let parent = focusedTextInput.parentElement;
+
+      while (parent) {
+        if (parent.tagName === 'FORM') {
+          (parent as HTMLFormElement).submit();
+        }
+
+        parent = parent.parentElement;
+      }
+    }
+  }, [submit, focusedTextInput]);
 
   useEffect(() => {
     if (linkIndex && validTags) {
@@ -69,14 +100,36 @@ export function Tags({
       );
 
       if (tag) {
-        (tag.node as HTMLElement).click();
+        if (
+          tag.node.tagName.toLowerCase() === 'input' &&
+          tag.node.getAttribute('type') === 'text'
+        ) {
+          console.log('[tag] - input focus');
+          (tag.node as HTMLInputElement).focus();
+          setFocusedTextInput(tag.node as HTMLInputElement);
+        } else {
+          console.log('[tag] - element click');
+          (tag.node as HTMLElement).click();
+        }
+        resetLinkIndex();
       }
     }
   }, [linkIndex]);
 
   useEffect(() => {
-    const mutationObserver = new MutationObserver(() => {
-      if (showTags) {
+    const mutationObserver = new MutationObserver((mutations) => {
+      const mutation = mutations[0];
+      const parent = mutation.target.parentElement;
+      let isAva = false;
+
+      if (parent && parent.getAttribute('data-ava')) {
+        isAva = true;
+      }
+
+      console.log('[mutations] - isAva', isAva);
+      console.log('[mutation] - mutation', mutation);
+
+      if (showTags && !isAva) {
         const [currValidTags, newTagElements] = createTags();
 
         if (currValidTags && newTagElements) {

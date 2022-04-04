@@ -110,7 +110,6 @@ function handleModalOptions(entities: Entity[], modalOptions: ModalOptions) {
 
   if (!modalOption || !modalType) {
     console.error('invalid modal entities', entities);
-    console.log('modal command: ', modalCommand);
     return;
   }
 
@@ -146,7 +145,6 @@ function handleTagsIntent(
 }
 
 function handleTabIntent(segment: SpeechSegment) {
-  console.log('[handleTabIntent] - ', segment);
   let isCloseAction = false;
   let indexEntityValue = -1;
   let website = '';
@@ -184,7 +182,6 @@ function handleTabIntent(segment: SpeechSegment) {
   }
 
   if (indexEntityValue > 0) {
-    console.log(`[tab] - moving to tab ${indexEntityValue}`);
     chrome.runtime.sendMessage({
       intent: INTENTS.TAB,
       action: 'open',
@@ -212,7 +209,44 @@ function handleNavigationIntent(segment: SpeechSegment) {
   }
 }
 
+function handleDictationIntent(segment: SpeechSegment, options: AvaOptions) {
+  const { entities } = segment;
+  if (entities.length > 0) {
+    /* eslint-disable */
+    debugger;
+    /* eslint-enable */
+
+    const dictateIndex = segment.words.findIndex(({ value }) =>
+      'dictate dictation'.includes(value.toLowerCase())
+    );
+
+    if (dictateIndex > -1) {
+      const dictation = segment.words
+        .slice(dictateIndex + 1)
+        .reduce((currDictation, word) => {
+          return `${currDictation} ${word.value.toLowerCase()}`;
+        }, '');
+
+      if (dictation) {
+        options.setDictation(dictation);
+      }
+    }
+  }
+}
+
+function handleSubmitIntent(options: AvaOptions) {
+  options.setSubmit();
+}
+
 export function processSegment(segment: SpeechSegment, options: AvaOptions) {
+  if (
+    segment.words.find(({ value }) =>
+      'dictate dictation'.includes(value.toLowerCase())
+    )
+  ) {
+    segment.intent.intent = 'dictation';
+  }
+
   switch (segment.intent.intent) {
     case 'open_website':
       window.location.href = `https://${segment.entities[0].value}`;
@@ -234,6 +268,12 @@ export function processSegment(segment: SpeechSegment, options: AvaOptions) {
       break;
     case 'navigation':
       handleNavigationIntent(segment);
+      break;
+    case 'dictation':
+      handleDictationIntent(segment, options);
+      break;
+    case 'submit':
+      handleSubmitIntent(options);
       break;
     default:
       console.error('unhandled intent: ', segment.intent.intent);

@@ -210,11 +210,11 @@ function checkElementVisibleOnScreen<T extends HTMLElement>(element: T) {
 }
 
 export function validateAnchorTag(anchor: HTMLAnchorElement) {
-  if (anchor.innerText === 'Gmail') {
-    /* eslint-disable */
-    debugger;
-    /* eslint-enable */
-  }
+  // if (anchor.innerText === 'Gmail') {
+  //   /* eslint-disable */
+  //   debugger;
+  //   /* eslint-enable */
+  // }
 
   if (!checkElementVisibleOnScreen(anchor)) {
     return false;
@@ -287,7 +287,6 @@ export function getValidAnchorTags(
       }
     }
   });
-  console.log('[getValidAnchorTags] - newValidTags', newValidTags);
 
   return [newValidTags, index];
 }

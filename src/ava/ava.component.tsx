@@ -19,6 +19,8 @@ export default function App(): React.ReactElement {
   const [renderTags, setRenderTags] = useState(false);
   const [showTags, setShowTags] = useState(false);
   const [contextIndex, setContextIndex] = useState<number | null>(null);
+  const [dictation, setDictation] = useState<string | null>(null);
+  const [submit, setSubmit] = useState(false);
 
   const options: AvaOptions = {
     modalOptions: {
@@ -30,6 +32,8 @@ export default function App(): React.ReactElement {
     setContextIndex: (index: number) => {
       setContextIndex(index);
     },
+    setDictation: (newDictation: string) => setDictation(newDictation),
+    setSubmit: () => setSubmit(true),
   };
 
   const { segment, clientState, startContext, stopContext, listening } =
@@ -113,6 +117,10 @@ export default function App(): React.ReactElement {
         setShowTags={(value: boolean) => setShowTags(value)}
         linkIndex={contextIndex}
         resetLinkIndex={() => setContextIndex(null)}
+        dictation={dictation}
+        resetDictation={() => setDictation(null)}
+        submit={submit}
+        resetSubmit={() => setSubmit(false)}
       />
       <div className={classnames(styles.app, listening && styles.active)}>
         {listening ? (
