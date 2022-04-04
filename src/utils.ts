@@ -104,32 +104,6 @@ export function getTagPosition(elementToTag: Element) {
   return [x, y];
 }
 
-export function getValidTagsFromPage() {
-  let allValidTags: ValidTag[] = [];
-  let index = 0;
-  const getValidTagFunctions = [
-    getValidAnchorTags,
-    getValidInputElements,
-    getValidDivElements,
-  ];
-
-  getValidTagFunctions.forEach((fn) => {
-    const [newValidTags, newIndex] = fn(index);
-    index = newIndex;
-    allValidTags = [...allValidTags, ...newValidTags];
-  });
-
-  return allValidTags.sort((a: ValidTag, b: ValidTag) => {
-    if (a.index < b.index) {
-      return -1;
-    } else if (a.index > b.index) {
-      return 1;
-    }
-
-    return 0;
-  });
-}
-
 function checkElementInView<T extends HTMLElement>(element: T) {
   const boundingClient = element.getBoundingClientRect();
   // Adjust coordinates to get more accurate results
@@ -343,10 +317,12 @@ export function validateDivTag(div: HTMLDivElement) {
   return checkElementVisibleOnScreen(div);
 }
 
+export const ariaRoles = 'button textbox combobox checkbox';
+
 export function getValidDivElements(
   startingIndex: number
 ): [ValidTag[], number] {
-  let newValidTags: ValidTag[] = [];
+  const newValidTags: ValidTag[] = [];
   let index = startingIndex;
 
   const divElements = Array.from<HTMLDivElement>(
@@ -357,7 +333,7 @@ export function getValidDivElements(
       Array.from(div.attributes).find((attr) => {
         if (
           attr.name === 'aria-controls' ||
-          (attr.name === 'role' && attr.value === 'button')
+          (attr.name === 'role' && ariaRoles.includes(attr.value.toLowerCase()))
         ) {
           return true;
         }
@@ -389,4 +365,32 @@ export function getValidDivElements(
   });
 
   return [newValidTags, index];
+}
+
+export function getValidTagsFromPage() {
+  let allValidTags: ValidTag[] = [];
+  let index = 0;
+  const getValidTagFunctions = [
+    getValidAnchorTags,
+    getValidInputElements,
+    getValidDivElements,
+  ];
+
+  getValidTagFunctions.forEach((fn) => {
+    const [newValidTags, newIndex] = fn(index);
+    index = newIndex;
+    allValidTags = [...allValidTags, ...newValidTags];
+  });
+
+  return allValidTags.sort((a: ValidTag, b: ValidTag) => {
+    if (a.index < b.index) {
+      return -1;
+    }
+
+    if (a.index > b.index) {
+      return 1;
+    }
+
+    return 0;
+  });
 }

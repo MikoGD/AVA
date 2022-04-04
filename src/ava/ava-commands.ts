@@ -223,9 +223,11 @@ function handleDictationIntent(segment: SpeechSegment, options: AvaOptions) {
     if (dictateIndex > -1) {
       const dictation = segment.words
         .slice(dictateIndex + 1)
-        .reduce((currDictation, word) => {
-          return `${currDictation} ${word.value.toLowerCase()}`;
-        }, '');
+        .reduce(
+          (currDictation, word) =>
+            `${currDictation} ${word.value.toLowerCase()}`,
+          ''
+        );
 
       if (dictation) {
         options.setDictation(dictation);

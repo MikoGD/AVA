@@ -3,13 +3,10 @@ import Loader from 'react-spinners/PulseLoader';
 import { Modal, ModalHeader, ModalBody } from '../../modal';
 import styles from './tags.module.scss';
 import {
+  ariaRoles,
   getTagPosition,
-  getValidAnchorTags,
-  getValidDivElements,
-  getValidInputElements,
   getValidTagsFromPage,
   onScrollStopListener,
-  validateAnchorTag,
 } from '../../utils';
 
 export interface ValidTag {
@@ -86,6 +83,8 @@ export function Tags({
       while (parent) {
         if (parent.tagName === 'FORM') {
           (parent as HTMLFormElement).submit();
+          resetSubmit();
+          break;
         }
 
         parent = parent.parentElement;
@@ -100,15 +99,16 @@ export function Tags({
       );
 
       if (tag) {
+        const { node } = tag;
+        const role = node.getAttribute('role');
         if (
-          tag.node.tagName.toLowerCase() === 'input' &&
-          tag.node.getAttribute('type') === 'text'
+          (node.tagName.toLowerCase() === 'input' &&
+            node.getAttribute('type') === 'text') ||
+          (role && ariaRoles.includes(role))
         ) {
-          console.log('[tag] - input focus');
           (tag.node as HTMLInputElement).focus();
           setFocusedTextInput(tag.node as HTMLInputElement);
         } else {
-          console.log('[tag] - element click');
           (tag.node as HTMLElement).click();
         }
         resetLinkIndex();
@@ -178,15 +178,13 @@ export function Tags({
         <ModalHeader>Tags</ModalHeader>
         <ModalBody ref={modalBodyRef}>
           {validTags ? (
-            validTags.map(({ id, index, displayText }) => {
-              return (
-                <div key={id} id={id} className={styles.linkContainer}>
-                  <p>
-                    {`${index}.`} {displayText}
-                  </p>
-                </div>
-              );
-            })
+            validTags.map(({ id, index, displayText }) => (
+              <div key={id} id={id} className={styles.linkContainer}>
+                <p>
+                  {`${index}.`} {displayText}
+                </p>
+              </div>
+            ))
           ) : (
             <Loader />
           )}
