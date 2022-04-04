@@ -101,3 +101,28 @@ chrome.runtime.onMessage.addListener((req: Message, sender) => {
       console.error('[background] - unhandled intent: ', intent);
   }
 });
+
+const ports = new Map<number, chrome.runtime.Port>();
+
+function handleOnActivated({ tabId }: chrome.tabs.TabActiveInfo) {
+  ports.forEach((port, id) => {
+    if (tabId === Number(id)) {
+      port.postMessage(true);
+    } else {
+      port.postMessage(false);
+    }
+  });
+}
+
+chrome.tabs.onActivated.addListener(handleOnActivated);
+
+chrome.runtime.onConnect.addListener((port) => {
+  if (port.sender && port.sender.tab && port.sender.tab.id) {
+    ports.set(port.sender.tab.id, port);
+    port.onDisconnect.addListener(() => {
+      if (port.sender && port.sender.tab && port.sender.tab.id) {
+        ports.delete(port.sender?.tab.id);
+      }
+    });
+  }
+});

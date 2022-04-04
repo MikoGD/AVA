@@ -39,20 +39,6 @@ export default function App(): React.ReactElement {
   const { segment, clientState, startContext, stopContext, listening } =
     useSpeechContext();
 
-  useEffect(() => {
-    if (segment) {
-      const { words, isFinal } = segment;
-
-      const dictation = wordsToSentence(words);
-
-      setSpeech(dictation);
-
-      if (isFinal) {
-        processSegment(segment, options);
-      }
-    }
-  }, [segment]);
-
   async function startListening() {
     try {
       await startContext();
@@ -71,6 +57,34 @@ export default function App(): React.ReactElement {
       console.error(e);
     }
   }
+
+  useEffect(() => {
+    const port = chrome.runtime.connect();
+    port.onMessage.addListener((isActiveTab) => {
+      if (!isActiveTab) {
+        stopListening();
+        setShowTags(false);
+      }
+    });
+
+    return () => {
+      port.disconnect();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (segment) {
+      const { words, isFinal } = segment;
+
+      const currDictation = wordsToSentence(words);
+
+      setSpeech(currDictation);
+
+      if (isFinal) {
+        processSegment(segment, options);
+      }
+    }
+  }, [segment]);
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
@@ -102,6 +116,7 @@ export default function App(): React.ReactElement {
     return () => window.removeEventListener('keydown', handleKeyDown, true);
   }, [listening, handleKeyDown]);
 
+  /* eslint-disable */
   return (
     <>
       <Tags
@@ -130,3 +145,4 @@ export default function App(): React.ReactElement {
     </>
   );
 }
+/* eslint-enable */
