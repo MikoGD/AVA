@@ -117,6 +117,13 @@ export function Tags({
   }, [linkIndex]);
 
   useEffect(() => {
+    if (isTagsModalOpen) {
+      setValidTags(getValidTagsFromPage());
+    }
+  }, [isTagsModalOpen]);
+
+  useEffect(() => {
+    // Watch DOM for changes to update tags
     const mutationObserver = new MutationObserver((mutations) => {
       const mutation = mutations[0];
       const parent = mutation.target.parentElement;
@@ -126,9 +133,7 @@ export function Tags({
         isAva = true;
       }
 
-      console.log('[mutations] - isAva', isAva);
-      console.log('[mutation] - mutation', mutation);
-
+      // Only update tags if the DOM changes are not just Ava
       if (showTags && !isAva) {
         const [currValidTags, newTagElements] = createTags();
 
@@ -144,18 +149,10 @@ export function Tags({
       childList: true,
     });
 
-    return () => {
-      mutationObserver.disconnect();
-    };
-  }, [showTags]);
+    const removeOnScrollStopListener = onScrollStopListener(window, () => {
+      setShowTags(true);
+    });
 
-  useEffect(() => {
-    if (isTagsModalOpen) {
-      setValidTags(getValidTagsFromPage());
-    }
-  }, [isTagsModalOpen]);
-
-  useEffect(() => {
     if (showTags) {
       const [currValidTags, newTagElements] = createTags();
 
@@ -167,15 +164,10 @@ export function Tags({
       setTagElements(null);
       setValidTags(null);
     }
-  }, [showTags]);
-
-  useEffect(() => {
-    const removeOnScrollStopListener = onScrollStopListener(window, () => {
-      setShowTags(true);
-    });
 
     return () => {
       removeOnScrollStopListener();
+      mutationObserver.disconnect();
     };
   }, [showTags]);
 

@@ -41,12 +41,7 @@ export default function App(): React.ReactElement {
 
   useEffect(() => {
     if (segment) {
-      const { intent, entities, words, isFinal } = segment;
-      console.log('Received new segment from the API:');
-      console.log('intent: ', intent);
-      console.log('entities: ', entities);
-      console.log('words: ', words);
-      console.log('isFinal: ', isFinal);
+      const { words, isFinal } = segment;
 
       const dictation = wordsToSentence(words);
 
@@ -107,7 +102,6 @@ export default function App(): React.ReactElement {
     return () => window.removeEventListener('keydown', handleKeyDown, true);
   }, [listening, handleKeyDown]);
 
-  /* eslint-disable */
   return (
     <>
       <Tags
@@ -135,5 +129,4 @@ export default function App(): React.ReactElement {
       </div>
     </>
   );
-  /* eslint-enable */
 }
