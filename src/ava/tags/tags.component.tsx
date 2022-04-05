@@ -8,15 +8,9 @@ import {
   getValidTagsFromPage,
   onScrollStopListener,
 } from '../../utils';
+import { ValidTag } from './types';
 
-export interface ValidTag {
-  id: string;
-  index: number;
-  displayText: string;
-  node: Element;
-}
-
-interface TagsProps {
+export interface TagsProps {
   isTagsModalOpen: boolean;
   showTags: boolean;
   renderTags: boolean;
@@ -27,26 +21,6 @@ interface TagsProps {
   resetDictation: () => void;
   submit: boolean;
   resetSubmit: () => void;
-}
-
-function createTags(): [ValidTag[], ReactElement[]] | [] {
-  const currValidTags = getValidTagsFromPage();
-  if (currValidTags.length > 0) {
-    const newTagElements: ReactElement[] = currValidTags.map(
-      ({ id, node, index }) => {
-        const [left, top] = getTagPosition(node);
-        return (
-          <span style={{ left, top }} className={styles.tag} key={id}>
-            {index}
-          </span>
-        );
-      }
-    );
-
-    return [currValidTags, newTagElements];
-  }
-
-  return [];
 }
 
 export function Tags({
@@ -68,6 +42,26 @@ export function Tags({
     useState<HTMLInputElement | null>();
   // Refs
   const modalBodyRef = useRef<HTMLDivElement | null>(null);
+
+  function createTags(): [ValidTag[], ReactElement[]] | [] {
+    const currValidTags = getValidTagsFromPage();
+    if (currValidTags.length > 0) {
+      const newTagElements: ReactElement[] = currValidTags.map(
+        ({ id, node, index }) => {
+          const [left, top] = getTagPosition(node);
+          return (
+            <span style={{ left, top }} className={styles.tag} key={id}>
+              {index}
+            </span>
+          );
+        }
+      );
+
+      return [currValidTags, newTagElements];
+    }
+
+    return [];
+  }
 
   useEffect(() => {
     if (dictation && focusedTextInput) {

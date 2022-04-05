@@ -1,10 +1,16 @@
-import { INTENTS } from './ava/ava-types';
+import { INTENTS } from './ava/types';
+
+type Disposition = 'NEW_WINDOW' | 'NEW_TAB' | 'CURRENT_TAB';
 
 interface Message {
   intent: string;
   action: string;
   tabPosition?: number;
   website?: string;
+  search?: {
+    disposition: Disposition;
+    query: string;
+  };
 }
 
 async function handleTabsIntent(
@@ -78,13 +84,29 @@ function handleNavigationIntent(
   }
 }
 
+function handleSearchIntent(
+  req: Message,
+  sender: chrome.runtime.MessageSender
+) {
+  const { search } = req;
+
+  if (search) {
+    const { disposition, query } = search;
+
+    if (query && sender.tab && sender.tab.id && disposition) {
+      chrome.search.query({ text: query, disposition }, () =>
+        console.log('hi')
+      );
+    }
+  }
+}
+
 chrome.runtime.onInstalled.addListener(() => {
   console.log('Ava installed');
 });
 
 chrome.runtime.onMessage.addListener((req: Message, sender) => {
   console.log('Message recieved: ', req);
-
   const { intent } = req;
 
   switch (intent) {
@@ -96,6 +118,9 @@ chrome.runtime.onMessage.addListener((req: Message, sender) => {
       break;
     case INTENTS.NAVIGATION:
       handleNavigationIntent(req, sender);
+      break;
+    case INTENTS.SEARCH:
+      handleSearchIntent(req, sender);
       break;
     default:
       console.error('[background] - unhandled intent: ', intent);

@@ -1,13 +1,16 @@
 import { ReactNode } from 'react';
 
 export enum INTENTS {
-  OPEN_WEBSITE = 'OPEN_WEBSITE',
-  SCROLL = 'SCROLL',
-  TAGS = 'TAGS',
-  REFRESH = 'REFRESH',
-  TAB = 'TABS',
-  INDEX = 'INDEX',
-  NAVIGATION = 'NAVIGATION',
+  OPEN_WEBSITE = 'open_website',
+  SCROLL = 'scroll',
+  TAGS = 'tags',
+  REFRESH = 'refresh',
+  TAB = 'tabs',
+  INDEX = 'index',
+  NAVIGATION = 'navigation',
+  SEARCH = 'search',
+  DICTATION = 'dictation',
+  SUBMIT = 'submit',
 }
 export interface ModalOptions {
   [key: string]: () => void;
@@ -31,3 +34,9 @@ export interface Tag {
     left: number;
   };
 }
+
+export type Disposition = 'NEW_WINDOW' | 'NEW_TAB' | 'CURRENT_TAB';
+
+// No operation function
+// eslint-disable-next-line @typescript-eslint/no-empty-function
+export const noop = () => {};

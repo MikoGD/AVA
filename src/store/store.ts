@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction, configureStore } from '@reduxjs/toolkit';
-import { Tag } from '../ava/ava-types';
+import { Tag } from '../ava/types';
 
 export interface TagsState {
   tags: Tag[];

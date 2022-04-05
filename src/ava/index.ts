@@ -1,4 +1,4 @@
 import Ava from './ava.component';
 
-export { INTENTS } from './ava-types';
+export { INTENTS } from './types';
 export default Ava;

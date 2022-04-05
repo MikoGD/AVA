@@ -8,7 +8,7 @@ import { wordsToSentence } from '../utils';
 // @ts-ignore
 import styles from './ava.module.scss';
 import { processSegment } from './ava-commands';
-import { AvaOptions } from './ava-types';
+import { AvaOptions } from './types';
 import Tags from './tags';
 /* eslint-enable */
 
