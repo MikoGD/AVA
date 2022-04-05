@@ -1,6 +1,5 @@
 import { Word } from '@speechly/react-client';
-import { ReactElement } from 'react';
-import { ValidTag } from './ava/tags/tags.component';
+import { ValidTag } from './ava/tags';
 
 type AvailableInputTypesStr =
   | 'button'
@@ -15,6 +14,8 @@ type AvailableInputTypes =
   | HTMLSelectElement
   | HTMLOptionElement
   | HTMLTextAreaElement;
+
+export const ariaRoles = 'button textbox combobox checkbox';
 
 export function wordsToSentence(words: Word[]) {
   let firstWord = true;
@@ -75,27 +76,33 @@ export function onScrollStopListener<T extends HTMLElement | Window>(
   return () => element.removeEventListener('scroll', handleOnScroll);
 }
 
+/* Due to how different taggable element sizes are the tags could get in the way
+ * of the element. This algorithm allows for some room for the tags to move out
+ * of the element's way.
+ */
 export function getTagPosition(elementToTag: Element) {
   const { left, top, width, height } = elementToTag.getBoundingClientRect();
+  const tagDiameter = 50;
+  const tagRadius = tagDiameter / 2;
 
   let x = left;
   let y = top;
 
-  if (width < 50) {
-    let leftPosition = left - 12.5;
+  if (width < tagDiameter) {
+    let leftPosition = left - tagRadius / 2;
 
-    if (width < 25) {
-      leftPosition = left - 25;
+    if (width < tagRadius) {
+      leftPosition = left - tagRadius;
     }
 
     x = leftPosition < 0 ? 0 : leftPosition;
   }
 
-  if (height < 50) {
-    let topPosition = top - 12.5;
+  if (height < tagDiameter) {
+    let topPosition = top - tagRadius / 2;
 
-    if (height < 25) {
-      topPosition = top - 25;
+    if (height < tagRadius) {
+      topPosition = top - tagRadius;
     }
 
     y = topPosition < 0 ? 0 : topPosition;
@@ -108,17 +115,10 @@ function checkElementInView<T extends HTMLElement>(element: T) {
   const boundingClient = element.getBoundingClientRect();
   // Adjust coordinates to get more accurate results
   const left = boundingClient.left + 1;
-  const right = boundingClient.right - 1;
   const top = boundingClient.top + 1;
-  const bottom = boundingClient.bottom - 1;
-
-  const height = window.innerHeight || document.documentElement.clientHeight;
-  const width = window.innerWidth || document.documentElement.clientWidth;
 
   const isTopGreater = top >= 0;
   const isLeftGreater = left >= 0;
-  // const isBottomLower = bottom <= height;
-  // const isRightLower = right <= width;
 
   // Don't care if the right side or bottom of the element is not in view
   return isTopGreater && isLeftGreater;
@@ -183,13 +183,10 @@ function checkElementVisibleOnScreen<T extends HTMLElement>(element: T) {
   return isInView && isVisibile && !isOverlapped;
 }
 
+/* A valid tag is a tag that has a aria-label, title or text. It also needs to
+ * be visible to the user.
+ */
 export function validateAnchorTag(anchor: HTMLAnchorElement) {
-  // if (anchor.innerText === 'Gmail') {
-  //   /* eslint-disable */
-  //   debugger;
-  //   /* eslint-enable */
-  // }
-
   if (!checkElementVisibleOnScreen(anchor)) {
     return false;
   }
@@ -208,6 +205,9 @@ export function validateAnchorTag(anchor: HTMLAnchorElement) {
   let isDocumentElement = parent === document.documentElement;
   let isBody = parent === document.body;
 
+  /* Checks if all ancestor is in view as the child can only be visible if the
+   * The ancestors are in view
+   */
   while (parent && count < limit && !isDocumentElement && !isBody) {
     if (!checkElementVisibleOnScreen(parent)) {
       return false;
@@ -236,6 +236,7 @@ export function getValidAnchorTags(
       const titleAttr = tag.getAttribute('title')?.trim();
       const text = tag.innerText.trim();
 
+      // Display text is for the tags modal to show the tag
       let displayText = '';
 
       if (ariaLabel) {
@@ -278,6 +279,7 @@ function validateInputTag(input: AvailableInputTypes) {
   return checkElementVisibleOnScreen(input);
 }
 
+// Valid input elements are input elements visible to the user
 export function getValidInputElements(
   startingIndex: number
 ): [ValidTag[], number] {
@@ -317,8 +319,7 @@ export function validateDivTag(div: HTMLDivElement) {
   return checkElementVisibleOnScreen(div);
 }
 
-export const ariaRoles = 'button textbox combobox checkbox';
-
+// Some divs are clickable and have controls to them. These divs are valid tags
 export function getValidDivElements(
   startingIndex: number
 ): [ValidTag[], number] {

@@ -1,6 +1,4 @@
-import { INTENTS } from './ava/types';
-
-type Disposition = 'NEW_WINDOW' | 'NEW_TAB' | 'CURRENT_TAB';
+import { INTENTS, Disposition } from './ava/types';
 
 interface Message {
   intent: string;
