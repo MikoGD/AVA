@@ -1,4 +1,4 @@
-import { INTENTS, Disposition } from './ava/types';
+import { INTENTS, Disposition, noop } from './ava/types';
 
 interface Message {
   intent: string;
@@ -92,9 +92,7 @@ function handleSearchIntent(
     const { disposition, query } = search;
 
     if (query && sender.tab && sender.tab.id && disposition) {
-      chrome.search.query({ text: query, disposition }, () =>
-        console.log('hi')
-      );
+      chrome.search.query({ text: query, disposition }, noop);
     }
   }
 }
