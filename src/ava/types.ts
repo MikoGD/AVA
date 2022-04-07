@@ -1,5 +1,10 @@
 import { ReactNode } from 'react';
 
+export enum SPEAKER {
+  AVA,
+  USER,
+}
+
 export enum INTENTS {
   OPEN_WEBSITE = 'open_website',
   SCROLL = 'scroll',
@@ -40,3 +45,9 @@ export type Disposition = 'NEW_WINDOW' | 'NEW_TAB' | 'CURRENT_TAB';
 // No operation function
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 export const noop = () => {};
+
+export interface Line {
+  id: number;
+  speaker: SPEAKER;
+  text: string;
+}

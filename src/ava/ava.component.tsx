@@ -8,19 +8,20 @@ import { wordsToSentence } from '../utils';
 // @ts-ignore
 import styles from './ava.module.scss';
 import { processSegment } from './ava-commands';
-import { AvaOptions } from './types';
+import { AvaOptions, Line, SPEAKER } from './types';
 import Tags from './tags';
 /* eslint-enable */
 
 export default function App(): React.ReactElement {
   // useStates
-  const [speech, setSpeech] = useState('');
+  // const [speech, setSpeech] = useState('');
   const [isTagsModalOpen, setIsTagsModalOpen] = useState(false);
   const [renderTags, setRenderTags] = useState(false);
   const [showTags, setShowTags] = useState(false);
   const [contextIndex, setContextIndex] = useState<number | null>(null);
   const [dictation, setDictation] = useState<string | null>(null);
   const [submit, setSubmit] = useState(false);
+  const [dialogue, setDialogue] = useState<Line[]>([]);
 
   const options: AvaOptions = {
     modalOptions: {
@@ -51,10 +52,44 @@ export default function App(): React.ReactElement {
   async function stopListening() {
     try {
       await stopContext();
-      setSpeech('');
+      setDialogue([]);
     } catch (e) {
       console.error('failed to stop listening');
       console.error(e);
+    }
+  }
+
+  function addLineToDialogue(speech: string, user = true) {
+    if (dialogue.length >= 10) {
+      setDialogue((prev) => {
+        prev.shift();
+        return [...prev];
+      });
+    }
+
+    const line = {
+      id: dialogue.length,
+      speaker: user ? SPEAKER.USER : SPEAKER.AVA,
+      text: speech,
+    };
+
+    setDialogue((prev) => [...prev, line]);
+  }
+
+  function updateLastLine(speech: string) {
+    if (dialogue.length === 0) {
+      addLineToDialogue(speech);
+    } else {
+      setDialogue((prev) => {
+        const lastLine = prev.pop();
+
+        if (lastLine) {
+          lastLine.text = speech;
+          return [...prev, lastLine];
+        }
+
+        return prev;
+      });
     }
   }
 
@@ -76,12 +111,16 @@ export default function App(): React.ReactElement {
     if (segment) {
       const { words, isFinal } = segment;
 
-      const currDictation = wordsToSentence(words);
+      const sentence = wordsToSentence(words);
 
-      setSpeech(currDictation);
+      updateLastLine(sentence);
 
       if (isFinal) {
-        processSegment(segment, options);
+        try {
+          processSegment(segment, options);
+        } catch (e) {
+          addLineToDialogue(e as string, false);
+        }
       }
     }
   }, [segment]);
@@ -98,12 +137,6 @@ export default function App(): React.ReactElement {
           startListening();
         } else {
           stopListening();
-        }
-      } else if (ctrlKey && altKey && (key === 'c' || key === 'C')) {
-        if (!listening) {
-          setSpeech('Go to youtube');
-        } else {
-          setSpeech('');
         }
       }
     },
@@ -133,7 +166,7 @@ export default function App(): React.ReactElement {
       />
       <div className={classnames(styles.app, listening && styles.active)}>
         {listening ? (
-          <AvaTextComponent text={speech} />
+          <AvaTextComponent dialogue={dialogue} />
         ) : clientState < ClientState.Preinitialized ? (
           <Loader size={10} />
         ) : (
