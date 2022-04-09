@@ -50,4 +50,5 @@ export interface Line {
   id: number;
   speaker: SPEAKER;
   text: string;
+  isFinal: boolean;
 }

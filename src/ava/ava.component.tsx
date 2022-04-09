@@ -39,6 +39,7 @@ export default function App(): React.ReactElement {
 
   const { segment, clientState, startContext, stopContext, listening } =
     useSpeechContext();
+  // const { segment, clientState, startContext, stopContext } =
 
   async function startListening() {
     try {
@@ -71,21 +72,26 @@ export default function App(): React.ReactElement {
       id: dialogue.length,
       speaker: user ? SPEAKER.USER : SPEAKER.AVA,
       text: speech,
+      isFinal: !user,
     };
 
     setDialogue((prev) => [...prev, line]);
   }
 
-  function updateLastLine(speech: string) {
-    if (dialogue.length === 0) {
+  function updateLastLine(speech: string, isFinal = false) {
+    const lastDialogue = dialogue[dialogue.length - 1];
+    if (
+      dialogue.length === 0 ||
+      (lastDialogue &&
+        (lastDialogue.speaker === SPEAKER.AVA || lastDialogue.isFinal))
+    ) {
       addLineToDialogue(speech);
     } else {
       setDialogue((prev) => {
         const lastLine = prev.pop();
 
         if (lastLine) {
-          lastLine.text = speech;
-          return [...prev, lastLine];
+          return [...prev, { ...lastLine, text: speech, isFinal }];
         }
 
         return prev;
@@ -113,17 +119,21 @@ export default function App(): React.ReactElement {
 
       const sentence = wordsToSentence(words);
 
-      updateLastLine(sentence);
+      updateLastLine(sentence, isFinal);
 
       if (isFinal) {
         try {
           processSegment(segment, options);
         } catch (e) {
-          addLineToDialogue(e as string, false);
+          if (e instanceof Error) {
+            addLineToDialogue(e.message, false);
+          }
         }
       }
     }
   }, [segment]);
+
+  // const [listening, setListening] = useState(false);
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
@@ -137,6 +147,35 @@ export default function App(): React.ReactElement {
           startListening();
         } else {
           stopListening();
+        }
+      } else if (ctrlKey && altKey && (key === 'c' || key === 'C')) {
+        if (!listening) {
+          // setListening(true);
+          setTimeout(() => {
+            setDialogue((prev) => [
+              ...prev,
+              {
+                id: 0,
+                speaker: SPEAKER.USER,
+                text: 'Tags',
+                isFinal: true,
+              },
+            ]);
+          }, 2000);
+          setTimeout(() => {
+            setDialogue((prev) => [
+              ...prev,
+              {
+                id: 1,
+                speaker: SPEAKER.AVA,
+                text: "I'm sorry, could you repeat that again",
+                isFinal: true,
+              },
+            ]);
+          }, 4000);
+        } else {
+          // setListening(false);
+          setDialogue([]);
         }
       }
     },

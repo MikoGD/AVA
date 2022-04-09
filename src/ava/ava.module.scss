@@ -2,34 +2,46 @@
 
 .app {
   align-items: center;
+  background-color: $bg-main;
   border-radius: 4em;
   bottom: 5%;
-  background-color: $bg-main;
+  box-shadow: $shadow;
   display: flex;
   height: 8em;
   justify-content: center;
   left: 5%;
   overflow-wrap: break-word;
   position: fixed;
-  width: 8em;
-  box-shadow: $shadow;
-  z-index: 100000000000000000;
   transition: width 0.5s;
+  width: 8em;
+  z-index: 100000000000000000;
 
   & p {
-    font-size: xxx-large;
-    margin: 0;
+    font-size: 3.5em;
+    margin: 0.4em 0;
+    width: 80%;
   }
 }
 
 .active {
-  width: 50em;
   border-radius: 4em;
-  padding: 0 4em;
-  flex-direction: row;
+  height: fit-content;
   justify-content: start;
   min-height: 8em;
-  height: fit-content;
+  padding: 0 4em;
+  width: 50em;
+}
+
+.dialogueBox {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+
+  & .ava {
+    align-self: flex-end;
+    text-align: right;
+  }
 }
 
 .hidden {

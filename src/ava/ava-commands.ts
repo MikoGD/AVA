@@ -317,6 +317,9 @@ export function processSegment(segment: SpeechSegment, options: AvaOptions) {
     segment.intent.intent = 'dictation';
   }
 
+  throw new Error(`Cannot compute ${segment.intent.intent}`);
+  return;
+
   switch (segment.intent.intent) {
     case INTENTS.OPEN_WEBSITE:
       window.location.href = `https://${segment.entities[0].value}`;
@@ -349,6 +352,6 @@ export function processSegment(segment: SpeechSegment, options: AvaOptions) {
       handleSearchIntent(segment);
       break;
     default:
-      console.error('unhandled intent: ', segment.intent.intent);
+      throw new Error(`Cannot compute ${segment.intent.intent}`);
   }
 }
