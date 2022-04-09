@@ -173,7 +173,7 @@ export function Tags({
         <ModalBody ref={modalBodyRef}>
           {validTags ? (
             validTags.map(({ id, index, displayText }) => (
-              <div key={id} id={id} className={styles.linkContainer}>
+              <div key={id} id={id} className={styles['link-container']}>
                 <p>
                   {`${index}.`} {displayText}
                 </p>

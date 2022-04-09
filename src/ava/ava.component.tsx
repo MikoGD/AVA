@@ -4,13 +4,10 @@ import classnames from 'classnames';
 import Loader from 'react-spinners/SyncLoader';
 import AvaTextComponent from './ava-speech.component';
 import { wordsToSentence } from '../utils';
-/* eslint-disable */
-// @ts-ignore
 import styles from './ava.module.scss';
 import { processSegment } from './ava-commands';
 import { AvaOptions, Line, SPEAKER } from './types';
 import Tags from './tags';
-/* eslint-enable */
 
 export default function App(): React.ReactElement {
   // useStates

@@ -15,7 +15,7 @@ function App(): React.ReactElement {
 const container = document.createElement('div');
 
 container.style.zIndex = '100000000000000';
-container.id = styles.avaWrapper;
+container.id = styles['ava-wrapper'];
 container.toggleAttribute('data-ava');
 container.setAttribute('data-ava', 'ava');
 

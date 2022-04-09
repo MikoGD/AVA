@@ -9,7 +9,7 @@ interface ModalBodyProps {
 
 const ModalBody = React.forwardRef<HTMLDivElement, ModalBodyProps>(
   ({ children, classNames }, ref) => (
-    <div className={classnames(styles.modalBody, classNames)} ref={ref}>
+    <div className={classnames(styles['modal-body'], classNames)} ref={ref}>
       {children}
     </div>
   )

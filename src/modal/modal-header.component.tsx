@@ -12,7 +12,7 @@ export default function ModalHeader({
   classNames,
 }: ModalHeaderProps): React.ReactElement<ModalHeaderProps> {
   return (
-    <div className={classnames(styles.modalHeader, classNames)}>
+    <div className={classnames(styles['modal-header'], classNames)}>
       {typeof children === 'string' ? <h2>{children}</h2> : children}
     </div>
   );
