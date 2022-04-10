@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useSpeechContext, ClientState } from '@speechly/react-client';
 import classnames from 'classnames';
 import Loader from 'react-spinners/SyncLoader';
@@ -6,12 +6,11 @@ import AvaTextComponent from './ava-speech.component';
 import { wordsToSentence } from '../utils';
 import styles from './ava.module.scss';
 import { processSegment } from './ava-commands';
-import { AvaOptions, Line, SPEAKER } from './types';
+import { AvaOptions, AVA_POSITION, Line, SPEAKER } from './types';
 import Tags from './tags';
 
 export default function App(): React.ReactElement {
-  // useStates
-  // const [speech, setSpeech] = useState('');
+  // states
   const [isTagsModalOpen, setIsTagsModalOpen] = useState(false);
   const [renderTags, setRenderTags] = useState(false);
   const [showTags, setShowTags] = useState(false);
@@ -19,6 +18,9 @@ export default function App(): React.ReactElement {
   const [dictation, setDictation] = useState<string | null>(null);
   const [submit, setSubmit] = useState(false);
   const [dialogue, setDialogue] = useState<Line[]>([]);
+  const [avaPosition, setAvaPosition] = useState(AVA_POSITION.BOTTOM_LEFT);
+  // refs
+  const dialogueRef = useRef<HTMLDivElement>(null);
 
   const options: AvaOptions = {
     modalOptions: {
@@ -32,6 +34,7 @@ export default function App(): React.ReactElement {
     },
     setDictation: (newDictation: string) => setDictation(newDictation),
     setSubmit: () => setSubmit(true),
+    setAvaPosition: (position: AVA_POSITION) => setAvaPosition(position),
   };
 
   const { segment, clientState, startContext, stopContext, listening } =
@@ -73,6 +76,12 @@ export default function App(): React.ReactElement {
     };
 
     setDialogue((prev) => [...prev, line]);
+
+    if (dialogueRef.current) {
+      console.log('[dialogueRef] - scrolling', dialogueRef.current);
+      const divRef = dialogueRef.current;
+      divRef.scrollTop = divRef.scrollHeight;
+    }
   }
 
   function updateLastLine(speech: string, isFinal = false) {
@@ -93,6 +102,12 @@ export default function App(): React.ReactElement {
 
         return prev;
       });
+    }
+
+    if (dialogueRef.current) {
+      console.log('[dialogueRef] - scrolling', dialogueRef.current);
+      const divRef = dialogueRef.current;
+      divRef.scrollTop = divRef.scrollHeight;
     }
   }
 
@@ -200,7 +215,15 @@ export default function App(): React.ReactElement {
         submit={submit}
         resetSubmit={() => setSubmit(false)}
       />
-      <div className={classnames(styles.app, listening && styles.active)}>
+      <div
+        className={classnames(styles.app, listening && styles.active, {
+          [styles['top-left']]: avaPosition === AVA_POSITION.TOP_LEFT,
+          [styles['top-right']]: avaPosition === AVA_POSITION.TOP_RIGHT,
+          [styles['bottom-right']]: avaPosition === AVA_POSITION.BOTTOM_RIGHT,
+          [styles['bottom-left']]: avaPosition === AVA_POSITION.BOTTOM_LEFT,
+        })}
+        ref={dialogueRef}
+      >
         {listening ? (
           <AvaTextComponent dialogue={dialogue} />
         ) : clientState < ClientState.Preinitialized ? (

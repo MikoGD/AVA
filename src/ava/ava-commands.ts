@@ -2,7 +2,14 @@ import { SpeechSegment, Entity } from '@speechly/react-client';
 import React from 'react';
 import { Message } from '../background';
 import { getMaxChildScrollHeight, wordsToSentence } from '../utils';
-import { AvaOptions, INTENTS, ModalOptions, Disposition, noop } from './types';
+import {
+  AvaOptions,
+  INTENTS,
+  ModalOptions,
+  Disposition,
+  ENTITY_TYPES,
+  AVA_POSITION,
+} from './types';
 
 function sendMessageToBackground(
   message: Message,
@@ -320,6 +327,47 @@ function handleSearchIntent(segment: SpeechSegment) {
   }
 }
 
+function handleAvaMoveIntent(segment: SpeechSegment, options: AvaOptions) {
+  const { entities } = segment;
+
+  if (entities.length < 1) {
+    throw new Error("I'm sorry could you repeat that again");
+  }
+
+  const actionEntity = entities.find(
+    ({ type }) => type === ENTITY_TYPES.ACTION
+  );
+  const positionEntity = entities.find(
+    ({ type }) => type === ENTITY_TYPES.POSITION
+  );
+
+  if (actionEntity) {
+    if (positionEntity) {
+      const position = positionEntity.value.toLowerCase();
+
+      switch (position) {
+        case AVA_POSITION.TOP_LEFT:
+          options.setAvaPosition(AVA_POSITION.TOP_LEFT);
+          break;
+        case AVA_POSITION.TOP_RIGHT:
+          options.setAvaPosition(AVA_POSITION.TOP_RIGHT);
+          break;
+        case AVA_POSITION.BOTTOM_RIGHT:
+          options.setAvaPosition(AVA_POSITION.BOTTOM_RIGHT);
+          break;
+        case AVA_POSITION.BOTTOM_LEFT:
+          options.setAvaPosition(AVA_POSITION.BOTTOM_LEFT);
+          break;
+        default:
+          throw new Error("I'm sorry could you repeat that?");
+      }
+      return;
+    }
+  }
+
+  throw new Error("I'm sorry could you repeat that ");
+}
+
 export function processSegment(segment: SpeechSegment, options: AvaOptions) {
   if (
     segment.words.find(({ value }) =>
@@ -359,6 +407,9 @@ export function processSegment(segment: SpeechSegment, options: AvaOptions) {
       break;
     case INTENTS.SEARCH:
       handleSearchIntent(segment);
+      break;
+    case INTENTS.AVA_MOVE:
+      handleAvaMoveIntent(segment, options);
       break;
     default:
       throw new Error(`I'm sorry can you repeat that?`);

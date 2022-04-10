@@ -16,7 +16,26 @@ export enum INTENTS {
   SEARCH = 'search',
   DICTATION = 'dictation',
   SUBMIT = 'submit',
+  AVA_MOVE = 'ava_move',
 }
+
+export enum ENTITY_TYPES {
+  ACTION = 'action',
+  POSITION = 'position',
+}
+
+export enum ACTIONS {
+  MOVE = 'move',
+  MOVE_OUT = 'move out',
+}
+
+export enum AVA_POSITION {
+  TOP_LEFT = 'top left',
+  TOP_RIGHT = 'top right',
+  BOTTOM_LEFT = 'bottom left',
+  BOTTOM_RIGHT = 'bottom right',
+}
+
 export interface ModalOptions {
   [key: string]: () => void;
   openTagModal: () => void;
@@ -30,6 +49,7 @@ export interface AvaOptions {
   setContextIndex: (index: number) => void;
   setDictation: (dictation: string) => void;
   setSubmit: () => void;
+  setAvaPosition: (position: AVA_POSITION) => void;
 }
 
 export interface Tag {

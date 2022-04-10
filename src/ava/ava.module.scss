@@ -7,12 +7,10 @@ $ava-radius: $ava-diameter / 2;
   align-items: center;
   background-color: $bg-main;
   border-radius: $ava-radius;
-  bottom: 5%;
   box-shadow: $shadow;
   display: flex;
   height: $ava-diameter;
   justify-content: center;
-  left: 5%;
   overflow-wrap: break-word;
   position: fixed;
   transition: width 0.5s;
@@ -24,6 +22,26 @@ $ava-radius: $ava-diameter / 2;
     margin: 0;
     width: 80%;
   }
+}
+
+.top-left {
+  left: 5%;
+  top: 5%;
+}
+
+.top-right {
+  right: 5%;
+  top: 5%;
+}
+
+.bottom-left {
+  bottom: 5%;
+  left: 5%;
+}
+
+.bottom-right {
+  bottom: 5%;
+  right: 5%;
 }
 
 .active {
