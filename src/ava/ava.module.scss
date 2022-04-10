@@ -1,34 +1,38 @@
 @import '../styles/index';
 
+$ava-diameter: 8.5em;
+$ava-radius: $ava-diameter / 2;
+
 .app {
   align-items: center;
   background-color: $bg-main;
-  border-radius: 4em;
+  border-radius: $ava-radius;
   bottom: 5%;
   box-shadow: $shadow;
   display: flex;
-  height: 8em;
+  height: $ava-diameter;
   justify-content: center;
   left: 5%;
   overflow-wrap: break-word;
   position: fixed;
   transition: width 0.5s;
-  width: 8em;
+  width: $ava-diameter;
   z-index: 100000000000000000;
 
   & p {
-    font-size: 3.5em;
-    margin: 0.4em 0;
+    font-size: 3em;
+    margin: 0;
     width: 80%;
   }
 }
 
 .active {
-  border-radius: 4em;
   height: fit-content;
   justify-content: start;
-  min-height: 8em;
-  padding: 0 4em;
+  max-height: 15em;
+  min-height: 7.75em;
+  overflow: hidden;
+  padding: 0.4em 4em;
   width: 50em;
 }
 
