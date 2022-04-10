@@ -15,7 +15,8 @@ type AvailableInputTypes =
   | HTMLOptionElement
   | HTMLTextAreaElement;
 
-export const ariaRoles = 'button textbox combobox checkbox';
+export const ariaTextRoles = 'textbox combobox';
+export const ariaClickRoles = 'button checkbox';
 
 export function wordsToSentence(words: Word[]) {
   let firstWord = true;
@@ -334,7 +335,8 @@ export function getValidDivElements(
       Array.from(div.attributes).find((attr) => {
         if (
           attr.name === 'aria-controls' ||
-          (attr.name === 'role' && ariaRoles.includes(attr.value.toLowerCase()))
+          (attr.name === 'role' &&
+            ariaTextRoles.includes(attr.value.toLowerCase()))
         ) {
           return true;
         }
@@ -394,4 +396,17 @@ export function getValidTagsFromPage() {
 
     return 0;
   });
+}
+
+let updateTimer: NodeJS.Timeout | null = null;
+
+export function updateTags(updateCallback: () => void) {
+  if (updateTimer) {
+    clearTimeout(updateTimer);
+  }
+
+  updateTimer = setTimeout(() => {
+    updateCallback();
+    updateTimer = null;
+  }, 300);
 }

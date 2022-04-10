@@ -3,10 +3,11 @@ import Loader from 'react-spinners/PulseLoader';
 import { Modal, ModalHeader, ModalBody } from '../../modal';
 import styles from './tags.module.scss';
 import {
-  ariaRoles,
+  ariaTextRoles,
   getTagPosition,
   getValidTagsFromPage,
   onScrollStopListener,
+  updateTags,
 } from '../../utils';
 import { ValidTag } from './types';
 
@@ -98,7 +99,7 @@ export function Tags({
         if (
           (node.tagName.toLowerCase() === 'input' &&
             node.getAttribute('type') === 'text') ||
-          (role && ariaRoles.includes(role))
+          (role && ariaTextRoles.includes(role))
         ) {
           (tag.node as HTMLInputElement).focus();
           setFocusedTextInput(tag.node as HTMLInputElement);
@@ -117,31 +118,33 @@ export function Tags({
   }, [isTagsModalOpen]);
 
   useEffect(() => {
-    // Watch DOM for changes to update tags
-    const mutationObserver = new MutationObserver((mutations) => {
-      const mutation = mutations[0];
-      const parent = mutation.target.parentElement;
-      let isAva = false;
+    let mutationObservers: MutationObserver[] = [];
+    if (showTags) {
+      Array.from(document.body.children).forEach((child) => {
+        if (!child.getAttribute('data-ava')) {
+          const currMutationObserver = new MutationObserver(() => {
+            if (showTags) {
+              const [currValidTags, newTagElements] = createTags();
 
-      if (parent && parent.getAttribute('data-ava')) {
-        isAva = true;
-      }
+              if (currValidTags && newTagElements) {
+                updateTags(() => {
+                  setTagElements([...newTagElements]);
+                  setValidTags([...currValidTags]);
+                });
+              }
+            }
+          });
 
-      // Only update tags if the DOM changes are not just Ava
-      if (showTags && !isAva) {
-        const [currValidTags, newTagElements] = createTags();
+          // Watch DOM for changes to update tags
+          currMutationObserver.observe(child, {
+            subtree: true,
+            childList: true,
+          });
 
-        if (currValidTags && newTagElements) {
-          setTagElements([...newTagElements]);
-          setValidTags([...currValidTags]);
+          mutationObservers.push(currMutationObserver);
         }
-      }
-    });
-
-    mutationObserver.observe(document.documentElement, {
-      subtree: true,
-      childList: true,
-    });
+      });
+    }
 
     const removeOnScrollStopListener = onScrollStopListener(window, () => {
       setShowTags(true);
@@ -161,7 +164,11 @@ export function Tags({
 
     return () => {
       removeOnScrollStopListener();
-      mutationObserver.disconnect();
+
+      if (mutationObservers.length > 0) {
+        mutationObservers.forEach((observer) => observer.disconnect());
+        mutationObservers = [];
+      }
     };
   }, [showTags]);
 
