@@ -1,8 +1,8 @@
 import { INTENTS, Disposition, noop } from './ava/types';
 
-interface Message {
+export interface Message {
   intent: string;
-  action: string;
+  action?: string;
   tabPosition?: number;
   website?: string;
   search?: {
@@ -65,11 +65,12 @@ function handleRefreshIntent(sender: chrome.runtime.MessageSender) {
 
 function handleNavigationIntent(
   req: Message,
-  sender: chrome.runtime.MessageSender
+  sender: chrome.runtime.MessageSender,
+  response: (response?: string) => void
 ) {
   const { action } = req;
 
-  if (!sender.tab || !sender.tab.id) {
+  if (!sender.tab || !sender.tab.id || !action) {
     return;
   }
 
@@ -78,7 +79,7 @@ function handleNavigationIntent(
   } else if ('forward next'.includes(action)) {
     chrome.tabs.goForward(sender.tab.id);
   } else {
-    console.error('[navigation] - invalid action', action);
+    response("I'm sorry could you repeat that?");
   }
 }
 
@@ -101,7 +102,7 @@ chrome.runtime.onInstalled.addListener(() => {
   console.log('Ava installed');
 });
 
-chrome.runtime.onMessage.addListener((req: Message, sender) => {
+chrome.runtime.onMessage.addListener((req: Message, sender, response) => {
   console.log('Message recieved: ', req);
   const { intent } = req;
 
@@ -113,13 +114,13 @@ chrome.runtime.onMessage.addListener((req: Message, sender) => {
       handleRefreshIntent(sender);
       break;
     case INTENTS.NAVIGATION:
-      handleNavigationIntent(req, sender);
+      handleNavigationIntent(req, sender, response);
       break;
     case INTENTS.SEARCH:
       handleSearchIntent(req, sender);
       break;
     default:
-      console.error('[background] - unhandled intent: ', intent);
+      response("I'm sorry could you repeat that?");
   }
 });
 

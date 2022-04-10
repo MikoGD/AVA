@@ -1,7 +1,21 @@
 import { SpeechSegment, Entity } from '@speechly/react-client';
 import React from 'react';
+import { Message } from '../background';
 import { getMaxChildScrollHeight, wordsToSentence } from '../utils';
 import { AvaOptions, INTENTS, ModalOptions, Disposition, noop } from './types';
+
+function sendMessageToBackground(
+  message: Message,
+  responseCallback?: (response: string) => void
+) {
+  chrome.runtime.sendMessage(message, (response: string) => {
+    if (responseCallback) {
+      responseCallback(response);
+    } else {
+      throw new Error(response);
+    }
+  });
+}
 
 function handlePositionScroll(position: string, options: AvaOptions) {
   options.setShowTag(false);
@@ -26,7 +40,7 @@ function handlePositionScroll(position: string, options: AvaOptions) {
       scrollOptions = { ...scrollOptions, top: maxHeight };
       break;
     default:
-      console.error('unhandled scroll position');
+      throw new Error("I'm sorry could you repeat that");
   }
 
   window.scrollTo(scrollOptions);
@@ -58,7 +72,7 @@ function handleDirectionScroll(direction: string, options: AvaOptions) {
       scrollOptions = { ...scrollOptions, left: horizontalIncrement };
       break;
     default:
-      console.error('unhandled scroll direction: ', direction);
+      throw new Error('I could not understand, can you repeat that?');
   }
 
   window.scrollBy(scrollOptions);
@@ -68,8 +82,7 @@ function handleScrollIntent(segment: SpeechSegment, options: AvaOptions) {
   const { entities } = segment;
 
   if (entities.length === 0) {
-    console.error('invalid entity');
-    return;
+    throw new Error('Could you repeat that?');
   }
 
   switch (entities[0].type) {
@@ -80,7 +93,7 @@ function handleScrollIntent(segment: SpeechSegment, options: AvaOptions) {
       handleDirectionScroll(entities[0].value.toLowerCase(), options);
       break;
     default:
-      console.error('unhandled scroll entities: ', entities);
+      throw new Error('Could you repeat that?');
   }
 }
 
@@ -109,8 +122,7 @@ function handleModalOptions(entities: Entity[], modalOptions: ModalOptions) {
   const modalCommand = `${modalOption} ${modalType}`;
 
   if (!modalOption || !modalType) {
-    console.error('invalid modal entities', entities);
-    return;
+    throw new Error("I'm sorry could you repeat that?");
   }
 
   switch (modalCommand) {
@@ -121,7 +133,7 @@ function handleModalOptions(entities: Entity[], modalOptions: ModalOptions) {
       modalOptions.closeTagModal();
       break;
     default:
-      console.error('unhandled modal command', modalCommand);
+      throw new Error("I'm sorry could you repeat that?");
   }
 }
 
@@ -169,26 +181,27 @@ function handleTabIntent(segment: SpeechSegment) {
 
   if (isCloseAction) {
     if (indexEntityValue) {
-      chrome.runtime.sendMessage({
+      sendMessageToBackground({
         intent: INTENTS.TAB,
         action: 'close',
         tabPosition: indexEntityValue,
       });
+
       return;
     }
 
-    chrome.runtime.sendMessage({ intent: INTENTS.TAB, action: 'close' });
+    sendMessageToBackground({ intent: INTENTS.TAB, action: 'close' });
     return;
   }
 
   if (indexEntityValue > 0) {
-    chrome.runtime.sendMessage({
+    sendMessageToBackground({
       intent: INTENTS.TAB,
       action: 'open',
       tabPosition: indexEntityValue,
     });
   } else {
-    chrome.runtime.sendMessage({ intent: INTENTS.TAB, action: 'new', website });
+    sendMessageToBackground({ intent: INTENTS.TAB, action: 'new', website });
   }
 }
 
@@ -201,10 +214,15 @@ function handleNavigationIntent(segment: SpeechSegment) {
     const { value } = segment.entities[0];
 
     if (value) {
-      chrome.runtime.sendMessage({
-        intent: INTENTS.NAVIGATION,
-        action: value.toLowerCase(),
-      });
+      chrome.runtime.sendMessage(
+        {
+          intent: INTENTS.NAVIGATION,
+          action: value.toLowerCase(),
+        },
+        (response: string) => {
+          throw new Error(response);
+        }
+      );
     }
   }
 }
@@ -278,31 +296,25 @@ function handleSearchIntent(segment: SpeechSegment) {
           tab: 'NEW_TAB',
         };
 
-        chrome.runtime.sendMessage(
-          {
-            intent: INTENTS.SEARCH,
-            search: {
-              query,
-              disposition: locations[browserLocationValue] ?? 'CURRENT_TAB',
-            },
+        sendMessageToBackground({
+          intent: INTENTS.SEARCH,
+          search: {
+            query,
+            disposition: locations[browserLocationValue] ?? 'CURRENT_TAB',
           },
-          noop
-        );
+        });
       } else {
         const query = Array.from(sentence)
           .splice(actionIndex + actionValue.length)
           .join('');
 
-        chrome.runtime.sendMessage(
-          {
-            intent: INTENTS.SEARCH,
-            search: {
-              query,
-              disposition: 'CURRENT_TAB',
-            },
+        sendMessageToBackground({
+          intent: INTENTS.SEARCH,
+          search: {
+            query,
+            disposition: 'CURRENT_TAB',
           },
-          noop
-        );
+        });
       }
     }
   }
@@ -316,9 +328,6 @@ export function processSegment(segment: SpeechSegment, options: AvaOptions) {
   ) {
     segment.intent.intent = 'dictation';
   }
-
-  throw new Error(`Cannot compute ${segment.intent.intent}`);
-  return;
 
   switch (segment.intent.intent) {
     case INTENTS.OPEN_WEBSITE:
@@ -352,6 +361,6 @@ export function processSegment(segment: SpeechSegment, options: AvaOptions) {
       handleSearchIntent(segment);
       break;
     default:
-      throw new Error(`Cannot compute ${segment.intent.intent}`);
+      throw new Error(`I'm sorry can you repeat that?`);
   }
 }
