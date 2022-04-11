@@ -4,12 +4,12 @@ import styles from './modal.module.scss';
 
 interface ModalBodyProps {
   children: React.ReactNode;
-  classNames?: string;
+  className?: string;
 }
 
 const ModalBody = React.forwardRef<HTMLDivElement, ModalBodyProps>(
-  ({ children, classNames }, ref) => (
-    <div className={classnames(styles['modal-body'], classNames)} ref={ref}>
+  ({ children, className }, ref) => (
+    <div className={classnames(styles['modal-body'], className)} ref={ref}>
       {children}
     </div>
   )

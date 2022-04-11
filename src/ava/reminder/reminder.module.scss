@@ -1,0 +1,37 @@
+@import '../../styles/index';
+
+div.modal-body {
+  justify-content: start;
+  padding: 1em;
+}
+
+article.reminder {
+  border-radius: 0.5em;
+  box-shadow: $card-shadow;
+  display: flex;
+  flex-direction: column;
+  height: 10em;
+  margin-bottom: 2em;
+  padding: 1em;
+  width: 100%;
+
+  div.reminder {
+    &-body {
+      flex-grow: 1;
+    }
+
+    &-dates {
+      display: flex;
+      width: 100%;
+
+      & h5 {
+        margin-right: 1em;
+
+        &.due {
+          color: red;
+          font-weight: 500;
+        }
+      }
+    }
+  }
+}

@@ -4,15 +4,15 @@ import styles from './modal.module.scss';
 
 interface ModalHeaderProps {
   children: React.ReactNode;
-  classNames?: string;
+  className?: string;
 }
 
 export default function ModalHeader({
   children,
-  classNames,
+  className,
 }: ModalHeaderProps): React.ReactElement<ModalHeaderProps> {
   return (
-    <div className={classnames(styles['modal-header'], classNames)}>
+    <div className={classnames(styles['modal-header'], className)}>
       {typeof children === 'string' ? <h2>{children}</h2> : children}
     </div>
   );

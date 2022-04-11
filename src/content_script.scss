@@ -1,9 +1,39 @@
 @import './styles/index';
 
-#ava-wrapper {
-  box-sizing: border-box;
-  font-family: 'Opens Sans', sans-serif !important;
-  font-size: $default-font-size !important;
-  margin: 0;
-  padding: 0;
+.ava-wrapper {
+  & *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+    color: $font-color-main;
+    font-family: 'Opens Sans', sans-serif;
+    font-size: $default-font-size;
+    margin: 0;
+    padding: 0;
+  }
+
+  & h2 {
+    font-size: xxx-large;
+    font-weight: 600;
+  }
+
+  & h3 {
+    font-size: xx-large;
+    font-weight: 500;
+  }
+
+  & h4 {
+    font-size: x-large;
+    font-weight: 400;
+  }
+
+  & h5 {
+    font-size: large;
+    font-style: italic;
+    font-weight: 400;
+  }
+
+  & p {
+    font-size: x-large;
+  }
 }

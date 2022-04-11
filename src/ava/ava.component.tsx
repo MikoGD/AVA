@@ -8,6 +8,7 @@ import styles from './ava.module.scss';
 import { processSegment } from './ava-commands';
 import { AvaOptions, AVA_POSITION, Line, SPEAKER } from './types';
 import Tags from './tags';
+import Reminder from './reminder';
 
 export default function App(): React.ReactElement {
   // states
@@ -215,6 +216,7 @@ export default function App(): React.ReactElement {
         submit={submit}
         resetSubmit={() => setSubmit(false)}
       />
+      <Reminder isOpen={true} />
       <div
         className={classnames(styles.app, listening && styles.active, {
           [styles['top-left']]: avaPosition === AVA_POSITION.TOP_LEFT,
@@ -229,7 +231,7 @@ export default function App(): React.ReactElement {
         ) : clientState < ClientState.Preinitialized ? (
           <Loader size={10} />
         ) : (
-          <div>
+          <div className={styles.logo}>
             <p>A</p>
           </div>
         )}

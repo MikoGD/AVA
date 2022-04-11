@@ -5,7 +5,7 @@ $ava-radius: $ava-diameter / 2;
 
 .app {
   align-items: center;
-  background-color: $bg-main;
+  background-color: $bg-color-main;
   border-radius: $ava-radius;
   box-shadow: $shadow;
   display: flex;
@@ -17,10 +17,9 @@ $ava-radius: $ava-diameter / 2;
   width: $ava-diameter;
   z-index: 100000000000000000;
 
-  & p {
+  .logo p {
     font-size: 3em;
     margin: 0;
-    width: 80%;
   }
 }
 
@@ -44,17 +43,21 @@ $ava-radius: $ava-diameter / 2;
   right: 5%;
 }
 
-.active {
+div.active {
   height: fit-content;
   justify-content: start;
   max-height: 15em;
-  min-height: 7.75em;
+  min-height: 8.5em;
   overflow: hidden;
   padding: 0.4em 4em;
   width: 50em;
 }
 
-.dialogue-box {
+div.dialogue-box {
+  p.dialogue {
+    font-size: 3em;
+  }
+
   display: flex;
   flex-direction: column;
   justify-content: center;
