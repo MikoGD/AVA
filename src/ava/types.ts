@@ -17,17 +17,38 @@ export enum INTENTS {
   DICTATION = 'dictation',
   SUBMIT = 'submit',
   AVA_MOVE = 'ava_move',
+  MODAL = 'modal',
 }
 
 export enum ENTITY_TYPES {
   ACTION = 'action',
   POSITION = 'position',
+  MODAL = 'modal',
 }
 
-export enum ACTIONS {
+export enum MODAL_TYPES {
+  REMINDER,
+  TAGS,
+}
+
+export const modals: Record<string, MODAL_TYPES> = {
+  'reminders reminder modal': MODAL_TYPES.REMINDER,
+  'tag list tag modal links tags': MODAL_TYPES.TAGS,
+};
+
+export enum ACTION_TYPES {
   MOVE = 'move',
   MOVE_OUT = 'move out',
+  OPEN = 'open show me',
+  CLOSE = 'close hide',
 }
+
+export const actions: Record<string, ACTION_TYPES> = {
+  move: ACTION_TYPES.MOVE,
+  'move out': ACTION_TYPES.MOVE_OUT,
+  'open show me list': ACTION_TYPES.OPEN,
+  'close hide': ACTION_TYPES.CLOSE,
+};
 
 export enum AVA_POSITION {
   TOP_LEFT = 'top left',
@@ -37,9 +58,10 @@ export enum AVA_POSITION {
 }
 
 export interface ModalOptions {
-  [key: string]: () => void;
+  [key: string]: (() => void) | ((isOpen: boolean) => void);
   openTagModal: () => void;
   closeTagModal: () => void;
+  setIsReminderOpen: (isOpen: boolean) => void;
 }
 
 export interface AvaOptions {

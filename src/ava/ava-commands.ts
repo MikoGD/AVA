@@ -1,7 +1,12 @@
 import { SpeechSegment, Entity } from '@speechly/react-client';
 import React from 'react';
 import { Message } from '../background';
-import { getMaxChildScrollHeight, wordsToSentence } from '../utils';
+import {
+  getActionTypeFromEntity,
+  getMaxChildScrollHeight,
+  getModalTypeFromEntity,
+  wordsToSentence,
+} from '../utils';
 import {
   AvaOptions,
   INTENTS,
@@ -9,6 +14,8 @@ import {
   Disposition,
   ENTITY_TYPES,
   AVA_POSITION,
+  MODAL_TYPES,
+  ACTION_TYPES,
 } from './types';
 
 function sendMessageToBackground(
@@ -104,46 +111,6 @@ function handleScrollIntent(segment: SpeechSegment, options: AvaOptions) {
   }
 }
 
-function handleModalOptions(entities: Entity[], modalOptions: ModalOptions) {
-  let modalOption = '';
-  let modalType = '';
-  const tagAliases = 'TAG TAGS LINK LINKS LIST';
-  const modalOptionTypes = { open: 'OPEN LIST', close: 'CLOSE' };
-
-  entities.forEach((entity) => {
-    if (entity.type === 'modal_options') {
-      if (modalOptionTypes.open.includes(entity.value)) {
-        modalOption = modalOptionTypes.open;
-      } else {
-        modalOption = modalOptionTypes.close;
-      }
-    }
-
-    if (entity.type === 'modal_type') {
-      if (tagAliases.includes(entity.value)) {
-        modalType = tagAliases;
-      }
-    }
-  });
-
-  const modalCommand = `${modalOption} ${modalType}`;
-
-  if (!modalOption || !modalType) {
-    throw new Error("I'm sorry could you repeat that?");
-  }
-
-  switch (modalCommand) {
-    case `${modalOptionTypes.open} ${tagAliases}`:
-      modalOptions.openTagModal();
-      break;
-    case `${modalOptionTypes.close} ${tagAliases}`:
-      modalOptions.closeTagModal();
-      break;
-    default:
-      throw new Error("I'm sorry could you repeat that?");
-  }
-}
-
 function handleTagsIntent(
   entities: Entity[],
   options: AvaOptions
@@ -155,8 +122,7 @@ function handleTagsIntent(
       return;
     }
 
-    handleModalOptions(entities, options.modalOptions);
-    return;
+    throw new Error("I'm sorry could you repeat that?");
   }
 
   options.setRenderTag(true);
@@ -333,39 +299,88 @@ function handleAvaMoveIntent(segment: SpeechSegment, options: AvaOptions) {
   if (entities.length < 1) {
     throw new Error("I'm sorry could you repeat that again");
   }
-
-  const actionEntity = entities.find(
-    ({ type }) => type === ENTITY_TYPES.ACTION
-  );
   const positionEntity = entities.find(
     ({ type }) => type === ENTITY_TYPES.POSITION
   );
 
-  if (actionEntity) {
-    if (positionEntity) {
-      const position = positionEntity.value.toLowerCase();
+  if (positionEntity) {
+    const position = positionEntity.value.toLowerCase();
 
-      switch (position) {
-        case AVA_POSITION.TOP_LEFT:
-          options.setAvaPosition(AVA_POSITION.TOP_LEFT);
-          break;
-        case AVA_POSITION.TOP_RIGHT:
-          options.setAvaPosition(AVA_POSITION.TOP_RIGHT);
-          break;
-        case AVA_POSITION.BOTTOM_RIGHT:
-          options.setAvaPosition(AVA_POSITION.BOTTOM_RIGHT);
-          break;
-        case AVA_POSITION.BOTTOM_LEFT:
-          options.setAvaPosition(AVA_POSITION.BOTTOM_LEFT);
-          break;
-        default:
-          throw new Error("I'm sorry could you repeat that?");
-      }
-      return;
+    switch (position) {
+      case AVA_POSITION.TOP_LEFT:
+        options.setAvaPosition(AVA_POSITION.TOP_LEFT);
+        break;
+      case AVA_POSITION.TOP_RIGHT:
+        options.setAvaPosition(AVA_POSITION.TOP_RIGHT);
+        break;
+      case AVA_POSITION.BOTTOM_RIGHT:
+        options.setAvaPosition(AVA_POSITION.BOTTOM_RIGHT);
+        break;
+      case AVA_POSITION.BOTTOM_LEFT:
+        options.setAvaPosition(AVA_POSITION.BOTTOM_LEFT);
+        break;
+      default:
+        throw new Error("I'm sorry could you repeat that?");
     }
   }
 
   throw new Error("I'm sorry could you repeat that ");
+}
+
+function handleModalAction(
+  modalType: MODAL_TYPES,
+  actionType: ACTION_TYPES.OPEN | ACTION_TYPES.CLOSE,
+  modalOptions: ModalOptions
+) {
+  if (modalType === MODAL_TYPES.REMINDER) {
+    if (actionType === ACTION_TYPES.OPEN) {
+      modalOptions.setIsReminderOpen(true);
+    } else {
+      modalOptions.setIsReminderOpen(false);
+    }
+
+    return;
+  }
+
+  if (modalType === MODAL_TYPES.TAGS) {
+    if (actionType === ACTION_TYPES.OPEN) {
+      modalOptions.openTagModal();
+    } else {
+      modalOptions.closeTagModal();
+    }
+  }
+}
+
+function handleModalIntent(segment: SpeechSegment, options: AvaOptions) {
+  const { entities } = segment;
+
+  console.log(entities);
+
+  if (entities.length < 1) {
+    throw new Error("I'm sorry could you repeat that");
+  }
+
+  const modalEntity = entities.find(({ type }) => type === ENTITY_TYPES.MODAL);
+  const actionEntity = entities.find(
+    ({ type }) => type === ENTITY_TYPES.ACTION
+  );
+
+  if (!modalEntity || !actionEntity) {
+    throw new Error("I'm sorry could you repeat that");
+  }
+
+  const modalType = getModalTypeFromEntity(modalEntity);
+  const actionType = getActionTypeFromEntity(actionEntity);
+
+  if (modalType === null || !actionType) {
+    throw new Error("I'm sorry could you repeat that");
+  }
+
+  if (actionType !== ACTION_TYPES.OPEN && actionType !== ACTION_TYPES.CLOSE) {
+    throw new Error("I'm sorry could you repeat that");
+  }
+
+  handleModalAction(modalType, actionType, options.modalOptions);
 }
 
 export function processSegment(segment: SpeechSegment, options: AvaOptions) {
@@ -410,6 +425,9 @@ export function processSegment(segment: SpeechSegment, options: AvaOptions) {
       break;
     case INTENTS.AVA_MOVE:
       handleAvaMoveIntent(segment, options);
+      break;
+    case INTENTS.MODAL:
+      handleModalIntent(segment, options);
       break;
     default:
       throw new Error(`I'm sorry can you repeat that?`);

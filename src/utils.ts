@@ -1,5 +1,6 @@
-import { Word } from '@speechly/react-client';
+import { Entity, Word } from '@speechly/react-client';
 import { ValidTag } from './ava/tags';
+import { actions, modals, MODAL_TYPES } from './ava/types';
 
 type AvailableInputTypesStr =
   | 'button'
@@ -409,4 +410,30 @@ export function updateTags(updateCallback: () => void) {
     updateCallback();
     updateTimer = null;
   }, 300);
+}
+
+export function getModalTypeFromEntity(entity: Entity): MODAL_TYPES | null {
+  const modal = entity.value.toLowerCase();
+  const type = Object.keys(modals).find((currModal) =>
+    currModal.includes(modal)
+  );
+
+  if (type) {
+    return modals[type];
+  }
+
+  return null;
+}
+
+export function getActionTypeFromEntity(entity: Entity) {
+  const action = entity.value.toLowerCase();
+  const type = Object.keys(actions).find((currAction) =>
+    currAction.includes(action)
+  );
+
+  if (type) {
+    return actions[type];
+  }
+
+  return null;
 }

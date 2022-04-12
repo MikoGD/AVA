@@ -20,6 +20,7 @@ export default function App(): React.ReactElement {
   const [submit, setSubmit] = useState(false);
   const [dialogue, setDialogue] = useState<Line[]>([]);
   const [avaPosition, setAvaPosition] = useState(AVA_POSITION.BOTTOM_LEFT);
+  const [isReminderModalOpen, setIsReminderModalOpen] = useState(false);
   // refs
   const dialogueRef = useRef<HTMLDivElement>(null);
 
@@ -27,6 +28,7 @@ export default function App(): React.ReactElement {
     modalOptions: {
       openTagModal: () => setIsTagsModalOpen(true),
       closeTagModal: () => setIsTagsModalOpen(false),
+      setIsReminderOpen: (isOpen: boolean) => setIsReminderModalOpen(isOpen),
     },
     setRenderTag: (value: boolean) => setRenderTags(value),
     setShowTag: (value: boolean) => setShowTags(value),
@@ -216,7 +218,7 @@ export default function App(): React.ReactElement {
         submit={submit}
         resetSubmit={() => setSubmit(false)}
       />
-      <Reminder isOpen={true} />
+      <Reminder isOpen={isReminderModalOpen} />
       <div
         className={classnames(styles.app, listening && styles.active, {
           [styles['top-left']]: avaPosition === AVA_POSITION.TOP_LEFT,
