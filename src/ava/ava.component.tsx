@@ -6,7 +6,7 @@ import AvaTextComponent from './ava-speech.component';
 import { wordsToSentence } from '../utils';
 import styles from './ava.module.scss';
 import { processSegment } from './ava-commands';
-import { AvaOptions, AVA_POSITION, Line, SPEAKER } from './types';
+import { AvaOptions, avaPositions, AVA_POSITION, Line, SPEAKER } from './types';
 import Tags from './tags';
 import Reminder from './reminder';
 
@@ -37,7 +37,21 @@ export default function App(): React.ReactElement {
     },
     setDictation: (newDictation: string) => setDictation(newDictation),
     setSubmit: () => setSubmit(true),
-    setAvaPosition: (position: AVA_POSITION) => setAvaPosition(position),
+    setAvaPosition: (position: AVA_POSITION) => {
+      if (position === avaPosition) {
+        const index = avaPositions.findIndex(
+          (currPosition) => currPosition === position
+        );
+
+        const newPosition = avaPositions[(index + 1) % 4];
+
+        setAvaPosition(newPosition);
+
+        return;
+      }
+
+      setAvaPosition(position);
+    },
   };
 
   const { segment, clientState, startContext, stopContext, listening } =

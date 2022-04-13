@@ -16,6 +16,7 @@ import {
   AVA_POSITION,
   MODAL_TYPES,
   ACTION_TYPES,
+  avaPositions,
 } from './types';
 
 function sendMessageToBackground(
@@ -297,14 +298,8 @@ function handleAvaMoveIntent(segment: SpeechSegment, options: AvaOptions) {
   const { entities } = segment;
 
   if (entities.length < 2) {
-    const positions = [
-      AVA_POSITION.TOP_LEFT,
-      AVA_POSITION.TOP_RIGHT,
-      AVA_POSITION.BOTTOM_LEFT,
-      AVA_POSITION.BOTTOM_RIGHT,
-    ];
     const index = Math.round(Math.random() * 3);
-    options.setAvaPosition(positions[index]);
+    options.setAvaPosition(avaPositions[index]);
 
     return;
   }

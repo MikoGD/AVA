@@ -94,3 +94,10 @@ export interface Line {
   text: string;
   isFinal: boolean;
 }
+
+export const avaPositions = [
+  AVA_POSITION.TOP_LEFT,
+  AVA_POSITION.TOP_RIGHT,
+  AVA_POSITION.BOTTOM_LEFT,
+  AVA_POSITION.BOTTOM_RIGHT,
+];
