@@ -130,59 +130,6 @@ function handleTagsIntent(
   options.setShowTag(true);
 }
 
-function handleTabIntent(segment: SpeechSegment) {
-  let isCloseAction = false;
-  let indexEntityValue = -1;
-  let website = '';
-
-  segment.entities.forEach((entity) => {
-    const { type, value } = entity;
-
-    if (type === 'action') {
-      if (value.toLowerCase() === 'close') {
-        isCloseAction = true;
-      }
-    }
-
-    if (type === 'index') {
-      indexEntityValue = Number(entity.value);
-    }
-
-    if (type === 'website') {
-      website = entity.value;
-    }
-  });
-
-  if (isCloseAction) {
-    if (indexEntityValue) {
-      sendMessageToBackground({
-        intent: INTENTS.TAB,
-        action: 'close',
-        tabPosition: indexEntityValue,
-      });
-
-      return;
-    }
-
-    sendMessageToBackground({ intent: INTENTS.TAB, action: 'close' });
-    return;
-  }
-
-  if (indexEntityValue > 0) {
-    sendMessageToBackground({
-      intent: INTENTS.TAB,
-      action: 'open',
-      tabPosition: indexEntityValue,
-    });
-  } else {
-    sendMessageToBackground({ intent: INTENTS.TAB, action: 'new', website });
-  }
-}
-
-function handleRefreshIntent() {
-  chrome.runtime.sendMessage({ intent: INTENTS.REFRESH });
-}
-
 function handleNavigationIntent(segment: SpeechSegment) {
   if (segment.entities.length > 0) {
     const { value } = segment.entities[0];
@@ -270,25 +217,25 @@ function handleSearchIntent(segment: SpeechSegment) {
           tab: 'NEW_TAB',
         };
 
-        sendMessageToBackground({
-          intent: INTENTS.SEARCH,
-          search: {
-            query,
-            disposition: locations[browserLocationValue] ?? 'CURRENT_TAB',
-          },
-        });
+        // sendMessageToBackground({
+        //   intent: INTENTS.SEARCH,
+        //   search: {
+        //     query,
+        //     disposition: locations[browserLocationValue] ?? 'CURRENT_TAB',
+        //   },
+        // });
       } else {
         const query = Array.from(sentence)
           .splice(actionIndex + actionValue.length)
           .join('');
 
-        sendMessageToBackground({
-          intent: INTENTS.SEARCH,
-          search: {
-            query,
-            disposition: 'CURRENT_TAB',
-          },
-        });
+        // sendMessageToBackground({
+        //   intent: INTENTS.SEARCH,
+        //   search: {
+        //     query,
+        //     disposition: 'CURRENT_TAB',
+        //   },
+        // });
       }
     }
   }
@@ -359,8 +306,6 @@ function handleModalAction(
 function handleModalIntent(segment: SpeechSegment, options: AvaOptions) {
   const { entities } = segment;
 
-  console.log(entities);
-
   if (entities.length < 1) {
     throw new Error("I'm sorry could you repeat that");
   }
@@ -409,12 +354,6 @@ export function processSegment(segment: SpeechSegment, options: AvaOptions) {
       break;
     case INTENTS.INDEX:
       options.setContextIndex(Number(segment.entities[0].value));
-      break;
-    case INTENTS.TAB:
-      handleTabIntent(segment);
-      break;
-    case INTENTS.REFRESH:
-      handleRefreshIntent();
       break;
     case INTENTS.NAVIGATION:
       handleNavigationIntent(segment);

@@ -5,7 +5,7 @@ import Loader from 'react-spinners/SyncLoader';
 import AvaTextComponent from './ava-speech.component';
 import { wordsToSentence } from '../utils';
 import styles from './ava.module.scss';
-import { processSegment } from './ava-commands';
+import processSegment from './commands';
 import { AvaOptions, avaPositions, AVA_POSITION, Line, SPEAKER } from './types';
 import Tags from './tags';
 import Reminder from './reminder';

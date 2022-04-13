@@ -1,6 +1,13 @@
 import { Entity, Word } from '@speechly/react-client';
 import { ValidTag } from './ava/tags';
-import { actions, modals, MODAL_TYPES } from './ava/types';
+import {
+  actions,
+  modals,
+  MODAL_TYPES,
+  nouns,
+  verbs,
+} from './ava/types';
+import { Message } from './background';
 
 type AvailableInputTypesStr =
   | 'button'
@@ -436,4 +443,59 @@ export function getActionTypeFromEntity(entity: Entity) {
   }
 
   return null;
+}
+
+export function getNounFromEntities(entities: Entity[]) {
+  const foundNouns: { [type: string]: Entity } = {};
+  const nounValues = Object.values(nouns);
+
+  entities.forEach((entity) => {
+    const isNoun = nounValues.includes(entity.type);
+    if (isNoun) {
+      foundNouns[entity.type] = entity;
+    }
+  });
+
+  return foundNouns;
+}
+
+export function getVerbTypeFromEntities(entities: Entity[]): string | null {
+  let type: string | null = null;
+
+  entities.find((entity) => {
+    const entityValue = entity.value.toLowerCase();
+
+    const typeFound = Object.values(verbs).find((currVerb) =>
+      currVerb.includes(entityValue)
+    );
+
+    type = typeFound ?? null;
+
+    return Boolean(typeFound);
+  });
+
+  return type;
+}
+
+export function getVerbTypeFromEntity(entity: Entity) {
+  const entityValue = entity.value.toLowerCase();
+
+  const type = Object.values(verbs).find((currVerb) =>
+    currVerb.includes(entityValue)
+  );
+
+  return type;
+}
+
+export function sendMessageToBackground(
+  message: Message,
+  responseCallback?: (response: string) => void
+) {
+  chrome.runtime.sendMessage(message, (response: string) => {
+    if (responseCallback) {
+      responseCallback(response);
+    } else {
+      throw new Error(response);
+    }
+  });
 }

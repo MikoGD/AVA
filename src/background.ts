@@ -1,7 +1,9 @@
-import { INTENTS, Disposition, noop } from './ava/types';
+import { Command, Noun } from './ava/commands';
+import { INTENTS, Disposition, noop, verbs, nouns } from './ava/types';
 
 export interface Message {
   intent: string;
+  command: Command;
   action?: string;
   tabPosition?: number;
   website?: string;
@@ -11,48 +13,62 @@ export interface Message {
   };
 }
 
+async function getTabId(currNouns: Noun[]) {
+  const tabPositionWord = currNouns.find(
+    ({ noun: { type } }) => type === nouns.index
+  );
+
+  if (tabPositionWord) {
+    const tabPosition = Number(tabPositionWord.noun.value);
+
+    const tabs = await chrome.tabs.query({ currentWindow: true });
+    const tab = tabs[tabPosition - 1];
+
+    return tab.id;
+  }
+
+  return undefined;
+}
+
 async function handleTabsIntent(
   message: Message,
   sender: chrome.runtime.MessageSender
 ) {
-  const { action, tabPosition, website } = message;
+  const { command } = message;
 
-  if (action === 'new') {
-    if (website && sender.tab && sender.tab.id) {
-      chrome.tabs.create({ url: `https://${website}` });
-      return;
-    }
-
+  if (!command.verb) {
     chrome.tabs.create({});
   }
 
-  if (action === 'close') {
-    if (tabPosition) {
-      const tabs = await chrome.tabs.query({
-        currentWindow: true,
-      });
-
-      const { id } = tabs[tabPosition - 1];
-
-      if (id) {
-        chrome.tabs.remove(id);
+  if (command.verb === verbs.open) {
+    if (command.nouns) {
+      const tabId = await getTabId(command.nouns);
+      if (tabId) {
+        await chrome.tabs.update(tabId, { active: true });
+        return;
       }
-    } else if (sender.tab && sender.tab.id) {
-      chrome.tabs.remove(sender.tab.id);
+
+      const websiteWord = command.nouns.find(
+        ({ noun: { type } }) => type === nouns.website
+      );
+
+      if (websiteWord) {
+        chrome.tabs.create({ url: `https://${websiteWord.noun.value}` });
+        return;
+      }
     }
+
+    chrome.tabs.create({});
+    return;
   }
 
-  if (action === 'open') {
-    if (tabPosition) {
-      const tabs = await chrome.tabs.query({
-        currentWindow: true,
-      });
+  if (command.verb === verbs.close && command.nouns) {
+    const tabId = await getTabId(command.nouns);
 
-      const { id } = tabs[tabPosition - 1];
-
-      if (id) {
-        await chrome.tabs.update(id, { active: true });
-      }
+    if (tabId) {
+      chrome.tabs.remove(tabId);
+    } else if (sender.tab && sender.tab.id) {
+      chrome.tabs.remove(sender.tab.id);
     }
   }
 }

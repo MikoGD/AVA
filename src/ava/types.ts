@@ -18,13 +18,53 @@ export enum INTENTS {
   SUBMIT = 'submit',
   AVA_MOVE = 'ava_move',
   MODAL = 'modal',
+  BROWSER = 'browser',
+  PAGE = 'page',
+  AVA = 'ava',
 }
 
 export enum ENTITY_TYPES {
   ACTION = 'action',
   POSITION = 'position',
   MODAL = 'modal',
+  DIRECTION = 'direction',
+  INDEX = 'index',
+  WEBSITE = 'website',
+  AVA = 'ava',
+  DATE = 'date',
+  TIME = 'time',
+  BROWSER = 'browser',
+  PAGE = 'page',
+  VERB = 'verb',
+  ADJECTIVE = 'adjective',
+  CORNER = 'corner',
+  TAG = 'tag',
+  FORM = 'form',
 }
+
+export const adjectives: Record<string, string> = {
+  new: 'new another',
+  current: 'current this',
+};
+
+export const positions = {
+  direction: 'direction',
+  position: 'position',
+};
+
+export const nouns = {
+  modal: 'modal',
+  index: 'index',
+  website: 'website',
+  ava: 'ava',
+  date: 'date',
+  time: 'time',
+  browser: 'browser',
+  page: 'page',
+  corner: 'corner',
+  tag: 'tag',
+  form: 'form',
+};
 
 export enum MODAL_TYPES {
   REMINDER,
@@ -42,6 +82,13 @@ export enum ACTION_TYPES {
   OPEN = 'open show me',
   CLOSE = 'close hide',
 }
+
+export const verbs: Record<string, string> = {
+  move: 'move out scroll',
+  open: 'open show me go back navigate',
+  close: 'close hide remove',
+  refresh: 'refresh reload',
+};
 
 export const actions: Record<string, ACTION_TYPES> = {
   move: ACTION_TYPES.MOVE,
