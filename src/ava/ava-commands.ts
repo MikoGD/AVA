@@ -296,9 +296,19 @@ function handleSearchIntent(segment: SpeechSegment) {
 function handleAvaMoveIntent(segment: SpeechSegment, options: AvaOptions) {
   const { entities } = segment;
 
-  if (entities.length < 1) {
-    throw new Error("I'm sorry could you repeat that again");
+  if (entities.length < 2) {
+    const positions = [
+      AVA_POSITION.TOP_LEFT,
+      AVA_POSITION.TOP_RIGHT,
+      AVA_POSITION.BOTTOM_LEFT,
+      AVA_POSITION.BOTTOM_RIGHT,
+    ];
+    const index = Math.round(Math.random() * 3);
+    options.setAvaPosition(positions[index]);
+
+    return;
   }
+
   const positionEntity = entities.find(
     ({ type }) => type === ENTITY_TYPES.POSITION
   );
