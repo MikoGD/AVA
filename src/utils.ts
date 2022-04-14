@@ -1,12 +1,6 @@
 import { Entity, Word } from '@speechly/react-client';
 import { ValidTag } from './ava/tags';
-import {
-  actions,
-  modals,
-  MODAL_TYPES,
-  nouns,
-  verbs,
-} from './ava/types';
+import { actions, modals, MODAL_TYPES, nouns, verbs } from './ava/types';
 import { Message } from './background';
 
 type AvailableInputTypesStr =

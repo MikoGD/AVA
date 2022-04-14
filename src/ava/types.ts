@@ -45,6 +45,7 @@ export enum ENTITY_TYPES {
 export const adjectives: Record<string, string> = {
   new: 'new another',
   current: 'current this',
+  previous: 'previous',
 };
 
 export const positions = {
@@ -85,7 +86,7 @@ export enum ACTION_TYPES {
 
 export const verbs: Record<string, string> = {
   move: 'move out scroll',
-  open: 'open show me go back navigate',
+  open: 'open show me go back to navigate',
   close: 'close hide remove',
   refresh: 'refresh reload',
 };

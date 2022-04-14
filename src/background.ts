@@ -79,24 +79,12 @@ function handleRefreshIntent(sender: chrome.runtime.MessageSender) {
   }
 }
 
-function handleNavigationIntent(
-  req: Message,
-  sender: chrome.runtime.MessageSender,
-  response: (response?: string) => void
-) {
-  const { action } = req;
-
-  if (!sender.tab || !sender.tab.id || !action) {
+function handleNavigationIntent(sender: chrome.runtime.MessageSender) {
+  if (!sender.tab || !sender.tab.id) {
     return;
   }
 
-  if ('back previous'.includes(action)) {
-    chrome.tabs.goBack(sender.tab.id);
-  } else if ('forward next'.includes(action)) {
-    chrome.tabs.goForward(sender.tab.id);
-  } else {
-    response("I'm sorry could you repeat that?");
-  }
+  chrome.tabs.goBack(sender.tab.id);
 }
 
 function handleSearchIntent(
@@ -130,7 +118,7 @@ chrome.runtime.onMessage.addListener((req: Message, sender, response) => {
       handleRefreshIntent(sender);
       break;
     case INTENTS.NAVIGATION:
-      handleNavigationIntent(req, sender, response);
+      handleNavigationIntent(sender);
       break;
     case INTENTS.SEARCH:
       handleSearchIntent(req, sender);

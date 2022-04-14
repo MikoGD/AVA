@@ -2,6 +2,7 @@ import { Entity, SpeechSegment } from '@speechly/react-client';
 import { getVerbTypeFromEntity } from '../../utils';
 import { adjectives, AvaOptions, ENTITY_TYPES, INTENTS, nouns } from '../types';
 import { handleBrowserIntent } from './browser';
+import { handlePageIntent } from './page';
 
 interface Word {
   type: string;
@@ -103,6 +104,9 @@ export function processSegment(segment: SpeechSegment, options: AvaOptions) {
   switch (intent) {
     case INTENTS.BROWSER:
       handleBrowserIntent(segment);
+      break;
+    case INTENTS.PAGE:
+      handlePageIntent(segment, options);
       break;
     default:
       // DELETE:
