@@ -93,6 +93,7 @@ export const verbs: Record<string, string> = {
   refresh: 'refresh reload',
   dictate: 'dictate dictation',
   submit: 'search submit',
+  search: 'search up search for look up find out',
 };
 
 export const actions: Record<string, ACTION_TYPES> = {

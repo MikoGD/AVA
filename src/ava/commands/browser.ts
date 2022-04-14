@@ -1,7 +1,14 @@
 import { SpeechSegment } from '@speechly/react-client';
-import { Command, constructCommand } from './commands';
+import { Command, constructCommand, Noun } from './commands';
 import { sendMessageToBackground } from '../../utils';
-import { AvaOptions, INTENTS, nouns, verbs } from '../types';
+import {
+  adjectives,
+  AvaOptions,
+  Disposition,
+  INTENTS,
+  nouns,
+  verbs,
+} from '../types';
 
 function handleOpenWebsite(website: string) {
   window.location.href = `https://${website}`;
@@ -16,6 +23,10 @@ function handleTabCommand(command: Command) {
 }
 
 function executeTab(command: Command) {
+  if (command.verb !== verbs.open && command.verb !== verbs.close) {
+    return false;
+  }
+
   if (
     command.nouns &&
     command.nouns.find(
@@ -51,7 +62,59 @@ function executeRefresh(command: Command) {
   return false;
 }
 
-const commandExecutions = [executeTab, executeOpenWebsite, executeRefresh];
+function executeSearch(command: Command) {
+  let browserNoun: Noun | null = null;
+  let disposition: Disposition = 'CURRENT_TAB';
+
+  if (command.nouns) {
+    // eslint-disable-next-line
+    for (const noun of command.nouns) {
+      if (
+        noun.noun.type === 'browser' &&
+        noun.adjective &&
+        (noun.adjective.type === 'new' || noun.adjective.type === 'current')
+      ) {
+        browserNoun = noun;
+      }
+    }
+  }
+
+  if (
+    browserNoun &&
+    browserNoun.adjective &&
+    browserNoun.adjective.type === 'new'
+  ) {
+    if (browserNoun.noun.value === 'tab') {
+      disposition = 'NEW_TAB';
+    } else if (browserNoun.noun.value === 'window') {
+      disposition = 'NEW_WINDOW';
+    }
+  }
+
+  const searchRegex =
+    /(?<=(look up|find out|search up|search for) )(((.*)(?= in.*?(another | new | this | current)))|((.*?)$))/gi;
+  const result = command.command.match(searchRegex);
+
+  if (!result) {
+    return false;
+  }
+
+  const query = result[0];
+
+  sendMessageToBackground({
+    intent: INTENTS.SEARCH,
+    command,
+    search: { query, disposition },
+  });
+  return true;
+}
+
+const commandExecutions = [
+  executeTab,
+  executeOpenWebsite,
+  executeRefresh,
+  executeSearch,
+];
 
 export function handleBrowserIntent(segment: SpeechSegment) {
   const { entities } = segment;

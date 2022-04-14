@@ -22,23 +22,25 @@ export const ariaClickRoles = 'button checkbox';
 
 export function wordsToSentence(words: Word[]) {
   let firstWord = true;
-  return words.reduce((currSentence, word) => {
-    if (!word) {
-      return currSentence;
-    }
+  return words
+    .reduce((currSentence, word) => {
+      if (!word) {
+        return currSentence;
+      }
 
-    const currWord = word.value.toLowerCase();
+      const currWord = word.value.toLowerCase();
 
-    if (firstWord) {
-      firstWord = false;
-      const wordArr = Array.from(currWord);
-      wordArr[0] = wordArr[0].toUpperCase();
+      if (firstWord) {
+        firstWord = false;
+        const wordArr = Array.from(currWord);
+        wordArr[0] = wordArr[0].toUpperCase();
 
-      return wordArr.join('');
-    }
+        return wordArr.join('');
+      }
 
-    return `${currSentence} ${currWord}`;
-  }, '');
+      return `${currSentence} ${currWord}`;
+    }, '')
+    .trim();
 }
 
 /* Returns the scrollHeight of the tallest child and child itself of node given */
