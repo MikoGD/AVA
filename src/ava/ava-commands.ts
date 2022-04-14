@@ -19,99 +19,6 @@ import {
   avaPositions,
 } from './types';
 
-function sendMessageToBackground(
-  message: Message,
-  responseCallback?: (response: string) => void
-) {
-  chrome.runtime.sendMessage(message, (response: string) => {
-    if (responseCallback) {
-      responseCallback(response);
-    } else {
-      throw new Error(response);
-    }
-  });
-}
-
-function handlePositionScroll(position: string, options: AvaOptions) {
-  options.setShowTag(false);
-
-  const body = document.getElementsByTagName('body')[0];
-  let maxHeight = body.scrollHeight;
-
-  if (maxHeight === 0) {
-    const [height] = getMaxChildScrollHeight(body);
-    maxHeight = height;
-  }
-
-  let scrollOptions: ScrollToOptions = {
-    behavior: 'smooth',
-  };
-
-  switch (position) {
-    case 'top':
-      scrollOptions = { ...scrollOptions, top: 0 };
-      break;
-    case 'bottom':
-      scrollOptions = { ...scrollOptions, top: maxHeight };
-      break;
-    default:
-      throw new Error("I'm sorry could you repeat that");
-  }
-
-  window.scrollTo(scrollOptions);
-}
-
-function handleDirectionScroll(direction: string, options: AvaOptions) {
-  options.setShowTag(false);
-
-  const verticalIncrement = window.visualViewport.height / 2;
-  const horizontalIncrement = window.visualViewport.width / 2;
-
-  let scrollOptions: ScrollToOptions = {
-    top: 0,
-    left: 0,
-    behavior: 'smooth',
-  };
-
-  switch (direction) {
-    case 'up':
-      scrollOptions = { ...scrollOptions, top: -verticalIncrement };
-      break;
-    case 'down':
-      scrollOptions = { ...scrollOptions, top: verticalIncrement };
-      break;
-    case 'left':
-      scrollOptions = { ...scrollOptions, left: -horizontalIncrement };
-      break;
-    case 'right':
-      scrollOptions = { ...scrollOptions, left: horizontalIncrement };
-      break;
-    default:
-      throw new Error('I could not understand, can you repeat that?');
-  }
-
-  window.scrollBy(scrollOptions);
-}
-
-function handleScrollIntent(segment: SpeechSegment, options: AvaOptions) {
-  const { entities } = segment;
-
-  if (entities.length === 0) {
-    throw new Error('Could you repeat that?');
-  }
-
-  switch (entities[0].type) {
-    case 'position':
-      handlePositionScroll(entities[0].value.toLowerCase(), options);
-      break;
-    case 'direction':
-      handleDirectionScroll(entities[0].value.toLowerCase(), options);
-      break;
-    default:
-      throw new Error('Could you repeat that?');
-  }
-}
-
 function handleTagsIntent(
   entities: Entity[],
   options: AvaOptions
@@ -128,24 +35,6 @@ function handleTagsIntent(
 
   options.setRenderTag(true);
   options.setShowTag(true);
-}
-
-function handleNavigationIntent(segment: SpeechSegment) {
-  if (segment.entities.length > 0) {
-    const { value } = segment.entities[0];
-
-    if (value) {
-      chrome.runtime.sendMessage(
-        {
-          intent: INTENTS.NAVIGATION,
-          action: value.toLowerCase(),
-        },
-        (response: string) => {
-          throw new Error(response);
-        }
-      );
-    }
-  }
 }
 
 function handleDictationIntent(segment: SpeechSegment, options: AvaOptions) {
@@ -343,20 +232,11 @@ export function processSegment(segment: SpeechSegment, options: AvaOptions) {
   }
 
   switch (segment.intent.intent) {
-    case INTENTS.OPEN_WEBSITE:
-      window.location.href = `https://${segment.entities[0].value}`;
-      break;
-    case INTENTS.SCROLL:
-      handleScrollIntent(segment, options);
-      break;
     case INTENTS.TAGS:
       handleTagsIntent(segment.entities, options);
       break;
     case INTENTS.INDEX:
       options.setContextIndex(Number(segment.entities[0].value));
-      break;
-    case INTENTS.NAVIGATION:
-      handleNavigationIntent(segment);
       break;
     case INTENTS.DICTATION:
       handleDictationIntent(segment, options);

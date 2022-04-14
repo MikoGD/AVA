@@ -49,8 +49,8 @@ export const adjectives: Record<string, string> = {
 };
 
 export const positions = {
-  direction: 'direction',
-  position: 'position',
+  direction: 'up down left right',
+  sides: 'top bottom',
 };
 
 export const nouns = {
@@ -65,6 +65,8 @@ export const nouns = {
   corner: 'corner',
   tag: 'tag',
   form: 'form',
+  direction: 'direction',
+  position: 'position',
 };
 
 export enum MODAL_TYPES {
