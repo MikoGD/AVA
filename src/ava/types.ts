@@ -24,7 +24,6 @@ export enum INTENTS {
 }
 
 export enum ENTITY_TYPES {
-  ACTION = 'action',
   POSITION = 'position',
   MODAL = 'modal',
   DIRECTION = 'direction',

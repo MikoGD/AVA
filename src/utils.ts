@@ -1,6 +1,5 @@
-import { Entity, Word } from '@speechly/react-client';
+import { Word } from '@speechly/react-client';
 import { ValidTag } from './ava/tags';
-import { actions, modals, MODAL_TYPES, nouns, verbs } from './ava/types';
 import { Message } from './background';
 
 type AvailableInputTypesStr =
@@ -413,74 +412,6 @@ export function updateTags(updateCallback: () => void) {
     updateCallback();
     updateTimer = null;
   }, 300);
-}
-
-export function getModalTypeFromEntity(entity: Entity): MODAL_TYPES | null {
-  const modal = entity.value.toLowerCase();
-  const type = Object.keys(modals).find((currModal) =>
-    currModal.includes(modal)
-  );
-
-  if (type) {
-    return modals[type];
-  }
-
-  return null;
-}
-
-export function getActionTypeFromEntity(entity: Entity) {
-  const action = entity.value.toLowerCase();
-  const type = Object.keys(actions).find((currAction) =>
-    currAction.includes(action)
-  );
-
-  if (type) {
-    return actions[type];
-  }
-
-  return null;
-}
-
-export function getNounFromEntities(entities: Entity[]) {
-  const foundNouns: { [type: string]: Entity } = {};
-  const nounValues = Object.values(nouns);
-
-  entities.forEach((entity) => {
-    const isNoun = nounValues.includes(entity.type);
-    if (isNoun) {
-      foundNouns[entity.type] = entity;
-    }
-  });
-
-  return foundNouns;
-}
-
-export function getVerbTypeFromEntities(entities: Entity[]): string | null {
-  let type: string | null = null;
-
-  entities.find((entity) => {
-    const entityValue = entity.value.toLowerCase();
-
-    const typeFound = Object.values(verbs).find((currVerb) =>
-      currVerb.includes(entityValue)
-    );
-
-    type = typeFound ?? null;
-
-    return Boolean(typeFound);
-  });
-
-  return type;
-}
-
-export function getVerbTypeFromEntity(entity: Entity) {
-  const entityValue = entity.value.toLowerCase();
-
-  const type = Object.values(verbs).find((currVerb) =>
-    currVerb.includes(entityValue)
-  );
-
-  return type;
 }
 
 export function sendMessageToBackground(

@@ -18,13 +18,13 @@ const reminders: Reminder[] = [
     id: 'note2',
     dateCreated: new Date(2022, 3, 8, 20, 0, 0),
     dateDue: new Date(2022, 3, 10, 16, 0, 0),
-    reminder: 'Eggs????',
+    reminder: 'Get eggs and milk',
   },
   {
     id: 'note1',
     dateCreated: new Date(2022, 3, 10, 20, 0, 0),
     dateDue: new Date(2022, 3, 15, 16, 0, 0),
-    reminder: 'Fuck up Russia',
+    reminder: 'Pay taxes',
   },
 ];
 

@@ -1,6 +1,13 @@
 import { Entity, SpeechSegment } from '@speechly/react-client';
-import { getVerbTypeFromEntity, wordsToSentence } from '../../utils';
-import { adjectives, AvaOptions, ENTITY_TYPES, INTENTS, nouns } from '../types';
+import { wordsToSentence } from '../../utils';
+import {
+  adjectives,
+  AvaOptions,
+  ENTITY_TYPES,
+  INTENTS,
+  nouns,
+  verbs,
+} from '../types';
 import { handleAvaIntent } from './ava';
 import { handleBrowserIntent } from './browser';
 import { handlePageIntent } from './page';
@@ -49,6 +56,16 @@ function getAdjectiveFromEntity(entity: Entity) {
 
 function getNounFromEntity(entity: Entity) {
   return { type: entity.type, value: entity.value.toLowerCase() };
+}
+
+function getVerbTypeFromEntity(entity: Entity) {
+  const entityValue = entity.value.toLowerCase();
+
+  const type = Object.values(verbs).find((currVerb) =>
+    currVerb.includes(entityValue)
+  );
+
+  return type;
 }
 
 export function constructCommand(segment: SpeechSegment) {
@@ -116,8 +133,6 @@ export function processSegment(segment: SpeechSegment, options: AvaOptions) {
       handleAvaIntent(segment, options);
       break;
     default:
-      // DELETE:
-      console.error('unhandled');
       throw new Error("I'm sorry, can you repeat that?");
   }
 }
