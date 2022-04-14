@@ -1,5 +1,13 @@
 import { SpeechSegment } from '@speechly/react-client';
-import { AvaOptions, avaPositions, AVA_POSITION, nouns, verbs } from '../types';
+import {
+  AvaOptions,
+  avaPositions,
+  AVA_POSITION,
+  modals,
+  MODAL_TYPES,
+  nouns,
+  verbs,
+} from '../types';
 import { Command, constructCommand } from './commands';
 
 function executeTags(command: Command, options: AvaOptions) {
@@ -61,7 +69,41 @@ function executeAvaMove(command: Command, options: AvaOptions) {
   return false;
 }
 
-const commandExecutions = [executeTags, executeAvaMove];
+function executeModal(command: Command, options: AvaOptions) {
+  if (command.nouns) {
+    const modal = command.nouns.find(
+      ({ noun: { type } }) => type === nouns.modal
+    );
+
+    if (command.verb === verbs.open && modal) {
+      if (MODAL_TYPES.REMINDER.includes(modal.noun.value)) {
+        options.modalOptions.setIsReminderOpen(true);
+        return true;
+      }
+
+      if (MODAL_TYPES.TAGS.includes(modal.noun.value)) {
+        options.modalOptions.openTagModal();
+        return true;
+      }
+    }
+
+    if (command.verb === verbs.close && modal) {
+      if (MODAL_TYPES.REMINDER.includes(modal.noun.value)) {
+        options.modalOptions.setIsReminderOpen(false);
+        return true;
+      }
+
+      if (MODAL_TYPES.TAGS.includes(modal.noun.value)) {
+        options.modalOptions.closeTagModal();
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+const commandExecutions = [executeTags, executeAvaMove, executeModal];
 
 export function handleAvaIntent(segment: SpeechSegment, options: AvaOptions) {
   const { entities } = segment;

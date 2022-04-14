@@ -70,13 +70,14 @@ export const nouns = {
 };
 
 export enum MODAL_TYPES {
-  REMINDER,
-  TAGS,
+  REMINDER = 'reminders reminder modal',
+  TAGS = 'tag list tag modal links tags link list links list tags list',
 }
 
 export const modals: Record<string, MODAL_TYPES> = {
   'reminders reminder modal': MODAL_TYPES.REMINDER,
-  'tag list tag modal links tags': MODAL_TYPES.TAGS,
+  'tag list tag modal links tags link list links list tags list':
+    MODAL_TYPES.TAGS,
 };
 
 export enum ACTION_TYPES {
