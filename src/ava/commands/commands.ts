@@ -107,7 +107,7 @@ export function processSegment(segment: SpeechSegment, options: AvaOptions) {
 
   switch (intent) {
     case INTENTS.BROWSER:
-      handleBrowserIntent(segment);
+      handleBrowserIntent(segment, options);
       break;
     case INTENTS.PAGE:
       handlePageIntent(segment, options);

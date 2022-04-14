@@ -1,14 +1,7 @@
 import { SpeechSegment } from '@speechly/react-client';
 import { Command, constructCommand, Noun } from './commands';
 import { sendMessageToBackground } from '../../utils';
-import {
-  adjectives,
-  AvaOptions,
-  Disposition,
-  INTENTS,
-  nouns,
-  verbs,
-} from '../types';
+import { AvaOptions, Disposition, INTENTS, nouns, verbs } from '../types';
 
 function handleOpenWebsite(website: string) {
   window.location.href = `https://${website}`;
@@ -116,7 +109,10 @@ const commandExecutions = [
   executeSearch,
 ];
 
-export function handleBrowserIntent(segment: SpeechSegment) {
+export function handleBrowserIntent(
+  segment: SpeechSegment,
+  options: AvaOptions
+) {
   const { entities } = segment;
 
   if (entities.length <= 0) {

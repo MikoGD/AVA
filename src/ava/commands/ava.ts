@@ -1,5 +1,5 @@
 import { SpeechSegment } from '@speechly/react-client';
-import { AvaOptions, nouns, verbs } from '../types';
+import { AvaOptions, avaPositions, AVA_POSITION, nouns, verbs } from '../types';
 import { Command, constructCommand } from './commands';
 
 function executeTags(command: Command, options: AvaOptions) {
@@ -24,7 +24,44 @@ function executeTags(command: Command, options: AvaOptions) {
   return false;
 }
 
-const commandExecutions = [executeTags];
+function executeAvaMove(command: Command, options: AvaOptions) {
+  if (command.verb === verbs.move) {
+    if (command.nouns) {
+      const corner = command.nouns.find(
+        ({ noun: { type } }) => type === nouns.corner
+      );
+
+      if (corner) {
+        switch (corner.noun.value) {
+          case AVA_POSITION.TOP_LEFT:
+            options.setAvaPosition(AVA_POSITION.TOP_LEFT);
+            break;
+          case AVA_POSITION.TOP_RIGHT:
+            options.setAvaPosition(AVA_POSITION.TOP_RIGHT);
+            break;
+          case AVA_POSITION.BOTTOM_RIGHT:
+            options.setAvaPosition(AVA_POSITION.BOTTOM_RIGHT);
+            break;
+          case AVA_POSITION.BOTTOM_LEFT:
+            options.setAvaPosition(AVA_POSITION.BOTTOM_LEFT);
+            break;
+          default:
+            return false;
+        }
+
+        return true;
+      }
+    }
+
+    const index = Math.round(Math.random() * 3);
+    options.setAvaPosition(avaPositions[index]);
+    return true;
+  }
+
+  return false;
+}
+
+const commandExecutions = [executeTags, executeAvaMove];
 
 export function handleAvaIntent(segment: SpeechSegment, options: AvaOptions) {
   const { entities } = segment;
@@ -35,5 +72,9 @@ export function handleAvaIntent(segment: SpeechSegment, options: AvaOptions) {
 
   const command = constructCommand(segment);
 
-  commandExecutions.find((execution) => execution(command, options));
+  if (commandExecutions.find((execution) => execution(command, options))) {
+    return;
+  }
+
+  throw new Error("I'm sorry could you repeat that?");
 }
