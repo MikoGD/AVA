@@ -63,7 +63,7 @@ export const nouns = {
   browser: 'browser',
   page: 'page',
   corner: 'corner',
-  tag: 'tag',
+  tag: 'tag link tags links',
   form: 'form',
   direction: 'direction',
   position: 'position',

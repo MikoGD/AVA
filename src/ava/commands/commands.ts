@@ -1,6 +1,7 @@
 import { Entity, SpeechSegment } from '@speechly/react-client';
 import { getVerbTypeFromEntity } from '../../utils';
 import { adjectives, AvaOptions, ENTITY_TYPES, INTENTS, nouns } from '../types';
+import { handleAvaIntent } from './ava';
 import { handleBrowserIntent } from './browser';
 import { handlePageIntent } from './page';
 
@@ -20,7 +21,7 @@ export interface Command {
 }
 
 function checkIsNoun(entity: Entity) {
-  const nounValues = Object.values(nouns);
+  const nounValues = Object.values(nouns).join(' ');
 
   return nounValues.includes(entity.type);
 }
@@ -107,6 +108,9 @@ export function processSegment(segment: SpeechSegment, options: AvaOptions) {
       break;
     case INTENTS.PAGE:
       handlePageIntent(segment, options);
+      break;
+    case INTENTS.AVA:
+      handleAvaIntent(segment, options);
       break;
     default:
       // DELETE:
