@@ -1,7 +1,7 @@
 import { SpeechSegment } from '@speechly/react-client';
 import { getMaxChildScrollHeight, sendMessageToBackground } from '../../utils';
 import { adjectives, AvaOptions, INTENTS, nouns, verbs } from '../types';
-import { constructCommand } from './commands';
+import { Command, constructCommand } from './commands';
 
 function handlePositionScroll(position: string, options: AvaOptions) {
   options.setShowTag(false);
@@ -64,45 +64,14 @@ function handleDirectionScroll(direction: string, options: AvaOptions) {
   window.scrollBy(scrollOptions);
 }
 
-export function handlePageIntent(segment: SpeechSegment, options: AvaOptions) {
-  const { entities } = segment;
-
-  if (entities.length <= 0) {
-    throw new Error("I'm sorry could you repeat that?");
-  }
-
-  const command = constructCommand(segment);
-
+function executeNavigation(command: Command, _: AvaOptions) {
   if (command.verb === verbs.open) {
     if (
       !command.nouns ||
       command.nouns.find(({ noun: { type } }) => type === nouns.page)
     ) {
       sendMessageToBackground({ intent: INTENTS.NAVIGATION, command });
-    }
-  }
-
-  if (
-    command.verb === verbs.move &&
-    command.nouns &&
-    command.nouns.length > 0
-  ) {
-    const directionWord = command.nouns.find(
-      ({ noun: { type } }) => type === nouns.direction
-    );
-
-    if (directionWord) {
-      handleDirectionScroll(directionWord.noun.value, options);
-      return;
-    }
-
-    const positionWord = command.nouns.find(
-      ({ noun: { type } }) => type === nouns.position
-    );
-
-    if (positionWord) {
-      handlePositionScroll(positionWord.noun.value, options);
-      return;
+      return true;
     }
   }
 
@@ -116,6 +85,60 @@ export function handlePageIntent(segment: SpeechSegment, options: AvaOptions) {
       )
     ) {
       sendMessageToBackground({ intent: INTENTS.NAVIGATION, command });
+      return true;
     }
   }
+
+  return false;
+}
+
+function executeScroll(command: Command, options: AvaOptions) {
+  if (
+    command.verb === verbs.move &&
+    command.nouns &&
+    command.nouns.length > 0
+  ) {
+    const directionWord = command.nouns.find(
+      ({ noun: { type } }) => type === nouns.direction
+    );
+
+    if (directionWord) {
+      handleDirectionScroll(directionWord.noun.value, options);
+      return true;
+    }
+
+    const positionWord = command.nouns.find(
+      ({ noun: { type } }) => type === nouns.position
+    );
+
+    if (positionWord) {
+      handlePositionScroll(positionWord.noun.value, options);
+      return true;
+    }
+  }
+
+  return false;
+}
+
+const commandExecutions = [executeNavigation, executeScroll];
+
+export function handlePageIntent(segment: SpeechSegment, options: AvaOptions) {
+  const { entities } = segment;
+
+  if (entities.length <= 0) {
+    throw new Error("I'm sorry could you repeat that?");
+  }
+
+  const command = constructCommand(segment);
+
+  /* eslint-disable-next-line */
+  if (executeScroll(command, options)) {
+    return;
+  }
+
+  if (executeScroll(command, options)) {
+    return;
+  }
+
+  commandExecutions.find((execution) => execution(command, options));
 }
