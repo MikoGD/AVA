@@ -1,5 +1,5 @@
 import { Entity, SpeechSegment } from '@speechly/react-client';
-import { getVerbTypeFromEntity } from '../../utils';
+import { getVerbTypeFromEntity, wordsToSentence } from '../../utils';
 import { adjectives, AvaOptions, ENTITY_TYPES, INTENTS, nouns } from '../types';
 import { handleAvaIntent } from './ava';
 import { handleBrowserIntent } from './browser';
@@ -18,6 +18,7 @@ export interface Noun {
 export interface Command {
   verb?: string;
   nouns?: Noun[];
+  command: string;
 }
 
 function checkIsNoun(entity: Entity) {
@@ -57,7 +58,9 @@ export function constructCommand(segment: SpeechSegment) {
     throw new Error("I'm sorry could you repeat that?");
   }
 
-  const command: Command = {};
+  const command: Command = {
+    command: wordsToSentence(segment.words).toLowerCase(),
+  };
   let verbFound = false;
   let hasAdjective = false;
   let currNoun: Partial<Noun> = {};

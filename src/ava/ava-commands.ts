@@ -37,33 +37,6 @@ function handleTagsIntent(
   options.setShowTag(true);
 }
 
-function handleDictationIntent(segment: SpeechSegment, options: AvaOptions) {
-  const { entities } = segment;
-  if (entities.length > 0) {
-    /* eslint-disable */
-    debugger;
-    /* eslint-enable */
-
-    const dictateIndex = segment.words.findIndex(({ value }) =>
-      'dictate dictation'.includes(value.toLowerCase())
-    );
-
-    if (dictateIndex > -1) {
-      const dictation = segment.words
-        .slice(dictateIndex + 1)
-        .reduce(
-          (currDictation, word) =>
-            `${currDictation} ${word.value.toLowerCase()}`,
-          ''
-        );
-
-      if (dictation) {
-        options.setDictation(dictation);
-      }
-    }
-  }
-}
-
 function handleSubmitIntent(options: AvaOptions) {
   options.setSubmit();
 }
@@ -232,9 +205,6 @@ export function processSegment(segment: SpeechSegment, options: AvaOptions) {
   }
 
   switch (segment.intent.intent) {
-    case INTENTS.DICTATION:
-      handleDictationIntent(segment, options);
-      break;
     case INTENTS.SUBMIT:
       handleSubmitIntent(options);
       break;

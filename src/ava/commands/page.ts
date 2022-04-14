@@ -133,7 +133,30 @@ function executeIndex(command: Command, options: AvaOptions) {
   return false;
 }
 
-const commandExecutions = [executeNavigation, executeScroll, executeIndex];
+function executeDictation(command: Command, options: AvaOptions) {
+  const commandArr = command.command.split(' ');
+  const dictateIndex = commandArr.findIndex((word) =>
+    'dictate dictation'.includes(word)
+  );
+
+  if (dictateIndex > -1) {
+    const dictation = commandArr.slice(dictateIndex + 1).join(' ');
+
+    if (dictation !== '') {
+      options.setDictation(dictation);
+      return true;
+    }
+  }
+
+  return false;
+}
+
+const commandExecutions = [
+  executeNavigation,
+  executeScroll,
+  executeIndex,
+  executeDictation,
+];
 
 export function handlePageIntent(segment: SpeechSegment, options: AvaOptions) {
   const { entities } = segment;
