@@ -151,11 +151,21 @@ function executeDictation(command: Command, options: AvaOptions) {
   return false;
 }
 
+function executeSubmit(command: Command, options: AvaOptions) {
+  if (command.verb === verbs.submit) {
+    options.setSubmit();
+    return true;
+  }
+
+  return false;
+}
+
 const commandExecutions = [
   executeNavigation,
   executeScroll,
   executeIndex,
   executeDictation,
+  executeSubmit,
 ];
 
 export function handlePageIntent(segment: SpeechSegment, options: AvaOptions) {

@@ -1,9 +1,6 @@
-import { SpeechSegment, Entity } from '@speechly/react-client';
-import React from 'react';
-import { Message } from '../background';
+import { SpeechSegment } from '@speechly/react-client';
 import {
   getActionTypeFromEntity,
-  getMaxChildScrollHeight,
   getModalTypeFromEntity,
   wordsToSentence,
 } from '../utils';
@@ -18,28 +15,6 @@ import {
   ACTION_TYPES,
   avaPositions,
 } from './types';
-
-function handleTagsIntent(
-  entities: Entity[],
-  options: AvaOptions
-): React.ReactElement[] | void {
-  if (entities.length > 0) {
-    if (entities.some(({ type }) => type === 'hide_tags')) {
-      options.setRenderTag(false);
-      options.setShowTag(false);
-      return;
-    }
-
-    throw new Error("I'm sorry could you repeat that?");
-  }
-
-  options.setRenderTag(true);
-  options.setShowTag(true);
-}
-
-function handleSubmitIntent(options: AvaOptions) {
-  options.setSubmit();
-}
 
 function handleSearchIntent(segment: SpeechSegment) {
   const { entities } = segment;
@@ -205,9 +180,6 @@ export function processSegment(segment: SpeechSegment, options: AvaOptions) {
   }
 
   switch (segment.intent.intent) {
-    case INTENTS.SUBMIT:
-      handleSubmitIntent(options);
-      break;
     case INTENTS.SEARCH:
       handleSearchIntent(segment);
       break;
