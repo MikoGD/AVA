@@ -24,9 +24,11 @@ function executeTags(command: Command, options: AvaOptions) {
       return true;
     }
 
-    options.setShowTag(true);
-    options.setRenderTag(true);
-    return true;
+    if (!command.verb) {
+      options.setShowTag(true);
+      options.setRenderTag(true);
+      return true;
+    }
   }
 
   return false;
@@ -74,6 +76,14 @@ function executeModal(command: Command, options: AvaOptions) {
     const modal = command.nouns.find(
       ({ noun: { type } }) => type === nouns.modal
     );
+
+    if (
+      command.verb === verbs.list &&
+      command.nouns.find(({ noun: { type } }) => nouns.tag.includes(type))
+    ) {
+      options.modalOptions.openTagModal();
+      return true;
+    }
 
     if (command.verb === verbs.open && modal) {
       if (MODAL_TYPES.REMINDER.includes(modal.noun.value)) {

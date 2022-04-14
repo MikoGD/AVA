@@ -83,7 +83,7 @@ export const modals: Record<string, MODAL_TYPES> = {
 export enum ACTION_TYPES {
   MOVE = 'move',
   MOVE_OUT = 'move out',
-  OPEN = 'open show me',
+  OPEN = 'open show me list',
   CLOSE = 'close hide',
 }
 
@@ -95,6 +95,7 @@ export const verbs: Record<string, string> = {
   dictate: 'dictate dictation',
   submit: 'search submit',
   search: 'search up search for look up find out',
+  list: 'list',
 };
 
 export const actions: Record<string, ACTION_TYPES> = {
