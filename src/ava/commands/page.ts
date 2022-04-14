@@ -131,12 +131,7 @@ export function handlePageIntent(segment: SpeechSegment, options: AvaOptions) {
 
   const command = constructCommand(segment);
 
-  /* eslint-disable-next-line */
-  if (executeScroll(command, options)) {
-    return;
-  }
-
-  if (executeScroll(command, options)) {
+  if (commandExecutions.find((execution) => execution(command, options))) {
     return;
   }
 
