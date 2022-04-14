@@ -232,12 +232,6 @@ export function processSegment(segment: SpeechSegment, options: AvaOptions) {
   }
 
   switch (segment.intent.intent) {
-    case INTENTS.TAGS:
-      handleTagsIntent(segment.entities, options);
-      break;
-    case INTENTS.INDEX:
-      options.setContextIndex(Number(segment.entities[0].value));
-      break;
     case INTENTS.DICTATION:
       handleDictationIntent(segment, options);
       break;

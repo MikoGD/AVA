@@ -120,7 +120,20 @@ function executeScroll(command: Command, options: AvaOptions) {
   return false;
 }
 
-const commandExecutions = [executeNavigation, executeScroll];
+function executeIndex(command: Command, options: AvaOptions) {
+  if (command.nouns) {
+    const [noun] = command.nouns;
+
+    if (noun.noun.type === nouns.index) {
+      options.setContextIndex(Number(noun.noun.value));
+      return true;
+    }
+  }
+
+  return false;
+}
+
+const commandExecutions = [executeNavigation, executeScroll, executeIndex];
 
 export function handlePageIntent(segment: SpeechSegment, options: AvaOptions) {
   const { entities } = segment;
