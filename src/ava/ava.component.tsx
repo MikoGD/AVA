@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useSpeechContext, ClientState } from '@speechly/react-client';
 import classnames from 'classnames';
 import Loader from 'react-spinners/SyncLoader';
@@ -21,8 +21,6 @@ export default function App(): React.ReactElement {
   const [dialogue, setDialogue] = useState<Line[]>([]);
   const [avaPosition, setAvaPosition] = useState(AVA_POSITION.BOTTOM_LEFT);
   const [isReminderModalOpen, setIsReminderModalOpen] = useState(false);
-  // refs
-  const dialogueRef = useRef<HTMLDivElement>(null);
 
   const options: AvaOptions = {
     modalOptions: {
@@ -93,38 +91,29 @@ export default function App(): React.ReactElement {
     };
 
     setDialogue((prev) => [...prev, line]);
-
-    if (dialogueRef.current) {
-      console.log('[dialogueRef] - scrolling', dialogueRef.current);
-      const divRef = dialogueRef.current;
-      divRef.scrollTop = divRef.scrollHeight;
-    }
   }
 
   function updateLastLine(speech: string, isFinal = false) {
-    const lastDialogue = dialogue[dialogue.length - 1];
+    let lastLine = dialogue[dialogue.length - 1];
     if (
       dialogue.length === 0 ||
-      (lastDialogue &&
-        (lastDialogue.speaker === SPEAKER.AVA || lastDialogue.isFinal))
+      (lastLine && (lastLine.speaker === SPEAKER.AVA || lastLine.isFinal))
     ) {
       addLineToDialogue(speech);
     } else {
       setDialogue((prev) => {
-        const lastLine = prev.pop();
+        if (prev.length > 0) {
+          // Ignore as array length is already checked if it is empty
+          // eslint-disable-next-line
+          lastLine = prev.pop()!;
 
-        if (lastLine) {
-          return [...prev, { ...lastLine, text: speech, isFinal }];
+          if (lastLine) {
+            return [...prev, { ...lastLine, text: speech, isFinal }];
+          }
         }
 
         return prev;
       });
-    }
-
-    if (dialogueRef.current) {
-      console.log('[dialogueRef] - scrolling', dialogueRef.current);
-      const divRef = dialogueRef.current;
-      divRef.scrollTop = divRef.scrollHeight;
     }
   }
 
