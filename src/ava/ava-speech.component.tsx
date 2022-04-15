@@ -30,6 +30,8 @@ export default function AvaTextComponent({
       })}
     </div>
   ) : (
-    <Loader size={10} />
+    <div className={styles['listening-loader']} id="test">
+      <Loader size={10} />
+    </div>
   );
 }

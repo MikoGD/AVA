@@ -44,6 +44,7 @@ $ava-radius: $ava-diameter / 2;
 }
 
 div.active {
+  align-items: end;
   height: fit-content;
   justify-content: start;
   max-height: 15em;
@@ -56,6 +57,7 @@ div.active {
 div.dialogue-box {
   p.dialogue {
     font-size: 3em;
+    width: 80%;
   }
 
   display: flex;
@@ -71,4 +73,8 @@ div.dialogue-box {
 
 .hidden {
   display: none;
+}
+
+div.listening-loader {
+  align-self: center;
 }
