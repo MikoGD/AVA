@@ -229,7 +229,6 @@ export default function App(): React.ReactElement {
           [styles['bottom-right']]: avaPosition === AVA_POSITION.BOTTOM_RIGHT,
           [styles['bottom-left']]: avaPosition === AVA_POSITION.BOTTOM_LEFT,
         })}
-        ref={dialogueRef}
       >
         {listening ? (
           <AvaTextComponent dialogue={dialogue} />

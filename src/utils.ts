@@ -62,7 +62,7 @@ export function getMaxChildScrollHeight<T extends HTMLElement>(
 
 export function onScrollStopListener<T extends HTMLElement | Window>(
   element: T,
-  onScrollCallback: () => void,
+  onScrollStopCallback: () => void,
   waitDuration = 200
 ) {
   let timeout: NodeJS.Timeout | null = null;
@@ -72,7 +72,7 @@ export function onScrollStopListener<T extends HTMLElement | Window>(
       clearTimeout(timeout);
     }
 
-    timeout = setTimeout(onScrollCallback, waitDuration);
+    timeout = setTimeout(onScrollStopCallback, waitDuration);
   }
 
   element.addEventListener('scroll', handleOnScroll);
